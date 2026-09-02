@@ -6,6 +6,9 @@ public class App {
     public static void main(String[] args) {
         Javalin app = getApp();
 
+        // адрес 0.0.0.0 позволяет пробрасывать порты и можно соединяться из
+        // браузера в windows к приложению на сервере в WSL;
+        // 127.0.0.1 и тп. не работают
         app.start("0.0.0.0", getPort());
     }
 
@@ -22,11 +25,12 @@ public class App {
     public static Javalin getApp() {
         var app = Javalin.create(config -> {
             config.bundledPlugins.enableDevLogging();
-            config.routes.get("/", ctx -> ctx.result("Hello World"));
+            config.routes.get("/", ctx -> ctx.result("Hello World!"));
         });
 
         return app;
     }
+
 
 }
 
