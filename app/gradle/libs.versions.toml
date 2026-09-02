@@ -1,0 +1,11 @@
+[versions]
+spotless-plugin = "8.10.1"
+commons-lang3-lib = "3.20.0"
+gradle-version-plugin = "0.53.0"
+
+[plugins]
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless-plugin" }
+versions = { id = "com.github.ben-manes.versions", version.ref = "gradle-version-plugin"}
+
+[libraries]
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3-lib" }
