@@ -1,12 +1,22 @@
-# Этап сборки
+# Этап 1: Сборка приложения
 FROM gradle:8.7-jdk21 AS builder
 WORKDIR /app
+
+# Копируем исходный код проекта
 COPY /app .
-# Теперь папка .gradle чистая, и флаг сработает идеально
+
+# Очищаем и собираем проект без использования Gradle Daemon (защита от багов WSL/Render)
 RUN gradle clean build --no-daemon -x test
 
-# Этап запуска (минимальный размер и расход памяти)
-FROM openjdk:21-slim
+# Этап 2: Запуск готового приложения (минимальный образ)
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=builder /app/build/libs/*.jar app.jar
+
+# Копируем собранный fat-jar из этапа сборки в финальный образ
+COPY --from=builder /app/build/libs/*-all.jar app.jar || COPY --from=builder /app/build/libs/*.jar app.jar
+
+# Открываем порт для Render
+EXPOSE 8080
+
+# Запускаем чистое Java-приложение (без лишних затрат ОЗУ на работу Gradle)
 CMD ["java", "-jar", "app.jar"]
