@@ -7,6 +7,8 @@ javalin-lib = "7.2.2"
 slf4j-simple-lib = "2.0.7"
 h2database-lib = "2.2.220"
 hicariCP-lib = "5.0.1"
+javalin-rendering-lib = "6.1.3"
+jte-lib = "3.1.9"
 
 
 [plugins]
@@ -18,6 +20,8 @@ lombok = { id = "io.freefair.lombok", version.ref = "lombok-plugin"}
 
 [libraries]
 javalin = { module = "io.javalin:javalin", version.ref = "javalin-lib"}
+javalin-rendering = { module = "io.javalin:javalin-rendering", version.ref = "javalin-rendering-lib"}
+jte = { module = "gg.jte:jte", version.ref = "jte-lib"}
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j-simple-lib"}
 hicariCP = { module = "com.zaxxer:HikariCP", version.ref = "hicariCP-lib"}
 h2database = { module = "com.h2database:h2", version.ref = "h2database-lib"}

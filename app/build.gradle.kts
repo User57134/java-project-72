@@ -53,6 +53,14 @@ dependencies {
     // Подключение базы данных H2
     implementation(libs.h2database)
 
+    // Подключаем модуль рендеринга для Javalin,
+    // implementation означает, что библиотека будет упакована внутрь вашего готового приложения
+    // и будет доступна как при компиляции, так и во время работы
+    implementation(libs.javalin.rendering)
+
+    // Подключаем шаблонизатор Jte для Javalin
+    implementation(libs.jte)
+
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
