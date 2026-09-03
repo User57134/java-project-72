@@ -11,6 +11,9 @@ plugins {
 
     // Плагин для сборки одного jar со всеми ресурсами
     alias(libs.plugins.shadow)
+
+    // Плагин для генерации классов
+    alias(libs.plugins.lombok)
 }
 
 group = "hexlet.code"
@@ -43,6 +46,12 @@ dependencies {
 
     // Подключение фасада для обработки логов совместно с простейшей реализацией
     implementation(libs.slf4j.simple)
+
+    // Подключение пуллера потокво для БД
+    implementation(libs.hicariCP)
+
+    // Подключение базы данных H2
+    implementation(libs.h2database)
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
