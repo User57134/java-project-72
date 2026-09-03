@@ -1,12 +1,12 @@
-FROM gradle:8.7-jdk21
-
+# Этап сборки
+FROM gradle:8.7-jdk21 AS builder
 WORKDIR /app
-
-# Копируем проект (убедитесь, что путь относительно корня репозитория указан верно)
 COPY /app .
-
-# Используем системный gradle вместо ./gradlew и отключаем Daemon
+# Теперь папка .gradle чистая, и флаг сработает идеально
 RUN gradle clean build --no-daemon -x test
 
-# Используем системный gradle для запуска
-CMD ["gradle", "run", "--no-daemon"]
+# Этап запуска (минимальный размер и расход памяти)
+FROM openjdk:21-slim
+WORKDIR /app
+COPY --from=builder /app/build/libs/*.jar app.jar
+CMD ["java", "-jar", "app.jar"]
