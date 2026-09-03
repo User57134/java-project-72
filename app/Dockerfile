@@ -4,6 +4,6 @@ WORKDIR /app
 
 COPY /app .
 
-RUN ["./gradlew", "clean", "build"]
+RUN ["./gradlew", "clean", "build", "--no-daemon"]
 
 CMD ["./gradlew", "run"]
