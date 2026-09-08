@@ -1,0 +1,5 @@
+
+@import "../../tailwind/node_modules/tailwindcss";
+@plugin "../../tailwind/node_modules/@tailwindcss/forms";
+
+@source "../../src/main/resources/templates";

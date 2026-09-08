@@ -3,5 +3,9 @@
 build:
 	./gradlew build
 
-setup:
+setup: build-css
 	./gradlew installDist
+
+build-css:
+	cd tailwind && npm ci
+	cd tailwind && npm run build:css
