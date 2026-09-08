@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build:css": "tailwindcss --input ../assets/css/source.css --output ../src/main/resources/static/css/main.css --minify --load-path=node_modules"
+    "build:css": "tailwindcss --input ../assets/css/source.css --output ../src/main/resources/static/css/main.css --minify --load-path=node_modules",
+    "watch:css": "tailwindcss --input ../assets/css/source.css --output ../src/main/resources/static/css/main.css --watch"
   },
   "keywords": [],
   "author": "",

@@ -30,7 +30,7 @@
 
 <main>
     <div>
-        Alert
+        Alert!
     </div>
 
     ${content}
