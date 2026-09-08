@@ -9,7 +9,7 @@ COPY /app .
 RUN gradle clean build --no-daemon -x test
 
 # Этап 2: Запуск готового приложения (минимальный образ)
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 
 # Копируем собранный shadow-jar (fat-jar) из этапа сборки
