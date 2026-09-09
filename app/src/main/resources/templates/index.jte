@@ -1,6 +1,16 @@
+@import hexlet.code.dto.urls.UrlAddingPage
+
+@param UrlAddingPage page
+
 @template.layout.page(
 content = @`
 <%-- Содержимое страницы --%>
+    @if(page.getError() != null)
+        <div class="bg-red-200">
+            <h6 class="text-taupe-800">${page.getError()}</h6>
+        </div>
+    @endif
+
     <div class="mx-auto max-w-3xl rounded-lg border border-gray-200 bg-gray-50 p-10">
         <h1 class="text-5xl font-light">Анализатор страниц</h1>
         <p class="mt-2 mb-6 text-xl text-gray-600">Бесплатно проверяйте сайты на SEO пригодность</p>

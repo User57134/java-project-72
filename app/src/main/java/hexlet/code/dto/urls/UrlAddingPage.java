@@ -11,6 +11,7 @@ import java.util.Map;
 
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 public class UrlAddingPage {
     private String name;

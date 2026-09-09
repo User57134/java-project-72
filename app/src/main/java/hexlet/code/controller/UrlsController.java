@@ -26,6 +26,18 @@ public class UrlsController {
 
     private static final Logger log = LoggerFactory.getLogger(App.class);
 
+
+    // Обработчик запроса на отображение главной страницы (формы добавления сайта)
+    public static void build(Context ctx) {
+        String name = ctx.formParam("name");
+
+        var page = new UrlAddingPage();
+
+        ctx.render("index.jte", Map.of("page", page));
+    }
+
+
+
     // Обработчик запроса на отображение сводной страницы со списком сайтов
     public static void showAll(Context ctx) {
         var urls = UrlRepository.getEntities();
@@ -49,40 +61,34 @@ public class UrlsController {
             }
         }
 
-        ErrorReport.send(ctx,"Internal Server Error", 500, "Некорректный id: " + sid);
+        ErrorReport.send(ctx,HttpStatus.valueOf("NOT_FOUND"), "Некорректный идентификатор сайта: " + sid);
     }
-
-
-    // Обработчик запроса на отображение формы добавления сайта
-//    public static void add(Context ctx) {
-//        var page = new UrlAddingPage();
-//        ctx.render("users/build.jte", Map.of("page", page));
-//    }
 
 
     // Обработчик запроса на добавление сайта
     public static void create(Context ctx) {
         String name = ctx.formParam("name");
 
-        URL siteUrl = null;
+        URL site = null;
         try {
             var uri = new URI(name);
-            siteUrl = uri.toURL();
+            site = uri.toURL();
         } catch (URISyntaxException ex) {
             log.error("UrlsController::create error: {}", ex.getMessage());
         } catch (MalformedURLException ex) {
             log.error("UrlsController::create error: {}", ex.getMessage());
         }
 
-        if (siteUrl != null) {
-            var id = UrlRepository.search(siteUrl.toString());
+        if (site != null) {
+            var id = UrlRepository.search(site.toString());
 
             if (id == 0L) {
-               var url = new Url(siteUrl.toString());
+               var url = new Url(site.toString());
+
                id = UrlRepository.save(url);
 
                if (id == 0L) {
-                   ErrorReport.send(ctx, "Internal Server Error", 500, "Ошибка при сохранении сайта");
+                   ErrorReport.send(ctx, HttpStatus.valueOf("INTERNAL_SERVER_ERROR"), "Ошибка при регистрации сайта");
                }
             }
 
@@ -111,6 +117,6 @@ public class UrlsController {
             }
         }
 
-        ErrorReport.send(ctx,"Not Found", 404, "Некорректный идентификатор сайта: " + sid);
+        ErrorReport.send(ctx,HttpStatus.valueOf("NOT_FOUND"), "Некорректный идентификатор сайта: " + sid);
     }
 }
