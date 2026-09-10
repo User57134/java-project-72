@@ -87,7 +87,7 @@ public class App {
 
         var hikariConfig = new HikariConfig();
 
-        hikariConfig.setJdbcUrl(getDatabaseUrl());
+        hikariConfig.setJdbcUrl(getDatabaseUrl().trim());
 
         var dataSource = new HikariDataSource(hikariConfig);
         BaseRepository.dataSource = dataSource;
