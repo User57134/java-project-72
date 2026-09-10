@@ -48,7 +48,7 @@ dependencies {
     implementation(libs.slf4j.simple)
 
     // Подключение пуллера потокво для БД
-    implementation(libs.hicariCP)
+    implementation(libs.hikariCP)
 
     // Подключение базы данных H2
     implementation(libs.h2database)
