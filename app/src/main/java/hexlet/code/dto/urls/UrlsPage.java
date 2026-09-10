@@ -1,11 +1,9 @@
 package hexlet.code.dto.urls;
 
 import hexlet.code.model.Url;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.util.List;
-
 
 @AllArgsConstructor
 @Getter

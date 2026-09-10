@@ -29,9 +29,6 @@
 </nav>
 
 <main>
-    <div>
-        Alert!
-    </div>
 
     ${content}
 

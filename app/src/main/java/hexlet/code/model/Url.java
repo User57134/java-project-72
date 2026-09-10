@@ -1,9 +1,9 @@
 package hexlet.code.model;
 
 import java.time.Instant;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 @Setter
@@ -11,10 +11,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Url {
     private Long id;
-    private String name;
+    @NonNull private String name;
     private Instant createdAt;
 
-    public Url(String name) {
-        this.name = name;
+    public Url(String url) {
+        name = url;
     }
 }

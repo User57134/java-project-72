@@ -113,7 +113,18 @@ public class App {
                             }
                             config.fileRenderer(new JavalinJte(createTemplateEngine()));
 
+                            // Обработка запросов на вывод главной страницы, открывается форма
+                            // добавления сайтов
                             config.routes.get(NamedRoutes.root(), UrlsController::build);
+
+                            // Обработка запросов на отображение страницы всех сайтов
+                            config.routes.get(NamedRoutes.urlsPath(), UrlsController::showAll);
+
+                            // Обработка запросов на добавление сайта
+                            config.routes.post(NamedRoutes.urlsPath(), UrlsController::create);
+
+                            // Обработка запросов на отображение страницы конкретного сайта
+                            config.routes.get(NamedRoutes.urlPath("{id}"), UrlsController::show);
                         });
 
         return app;

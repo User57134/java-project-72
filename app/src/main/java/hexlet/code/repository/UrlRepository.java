@@ -1,9 +1,7 @@
 package hexlet.code.repository;
 
-import hexlet.code.model.Url;
 import hexlet.code.App;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import hexlet.code.model.Url;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -12,7 +10,8 @@ import java.time.format.DateTimeParseException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UrlRepository extends BaseRepository {
     private static final Logger log = LoggerFactory.getLogger(App.class);
@@ -53,13 +52,13 @@ public class UrlRepository extends BaseRepository {
         return urls;
     }
 
-
     public static long save(Url url) {
-        String sql = "INSERT INTO urls (name, created_at) VALUES(?, ?, ?)";
+        String sql = "INSERT INTO urls (name, created_at) VALUES(?, ?)";
         Long id = null;
 
         try (var connection = dataSource.getConnection()) {
-            var preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            var preparedStatement =
+                    connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             preparedStatement.setString(1, url.getName());
 
@@ -84,7 +83,6 @@ public class UrlRepository extends BaseRepository {
         }
     }
 
-
     public static Optional<Url> find(Long id) {
         String sql = "SELECT * FROM urls WHERE id = ?";
 
@@ -107,7 +105,6 @@ public class UrlRepository extends BaseRepository {
         return Optional.empty();
     }
 
-
     public static long search(String url) {
         String sql = "SELECT * FROM urls WHERE urls.name = ?";
 
@@ -127,7 +124,6 @@ public class UrlRepository extends BaseRepository {
         return 0L;
     }
 
-
     public static boolean delete(Long id) {
         var sql = "DELETE FROM urls WHERE urls.id = ?";
 
@@ -146,7 +142,6 @@ public class UrlRepository extends BaseRepository {
 
         return false;
     }
-
 
     public static int deleteAll() {
         var sql = "DELETE FROM urls";
