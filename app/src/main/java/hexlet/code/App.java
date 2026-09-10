@@ -87,12 +87,20 @@ public class App {
 
         var hikariConfig = new HikariConfig();
 
-        hikariConfig.setJdbcUrl(getDatabaseUrl().trim());
+        String dbUrl = getDatabaseUrl().trim();
+        hikariConfig.setJdbcUrl(dbUrl);
+
+        // Явно указываем HikariCP, какой класс драйвера использовать
+        if (dbUrl.startsWith("jdbc:postgresql:")) {
+            hikariConfig.setDriverClassName("org.postgresql.Driver");
+        } else if (dbUrl.startsWith("jdbc:h2:")) {
+            hikariConfig.setDriverClassName("org.h2.Driver");
+        }
 
         var dataSource = new HikariDataSource(hikariConfig);
         BaseRepository.dataSource = dataSource;
 
-        // Create database urls
+        // Создание базы данных urls
         var createDbSql = getCreationDbSqlScript();
         try (var connection = dataSource.getConnection()) {
             var statement = connection.createStatement();
