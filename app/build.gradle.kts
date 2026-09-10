@@ -64,6 +64,9 @@ dependencies {
     // Подключаем библиотеку commons-lang3-lib для обработки чисел
     implementation(libs.commons.lang3)
 
+    // Подключение драйвера Postgresql
+    implementation(libs.postgresql)
+
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
