@@ -3,16 +3,15 @@ spotless-plugin = "8.10.1"
 gradle-version-plugin = "0.53.0"
 shadow-plugin = "8.3.11"
 lombok-plugin = "9.5.0"
-javalin-lib = "7.2.2"
 slf4j-simple-lib = "2.0.7"
 h2database-lib = "2.2.220"
-hikariCP-lib = "5.0.1"
-javalin-rendering-jte-lib = "7.2.2"
-jte-lib = "3.1.9"
-commons-lang3-lib = "3.20.0"
 postgresql-lib = "42.7.3"
+hikariCP-lib = "5.0.1"
+javalin-lib = "7.2.3"
+jte-lib = "3.2.4"
+commons-lang3-lib = "3.20.0"
 assertj-lib = "3.26.3"
-javalin-testtool-lib = "7.2.2"
+
 
 [plugins]
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless-plugin" }
@@ -23,12 +22,12 @@ lombok = { id = "io.freefair.lombok", version.ref = "lombok-plugin" }
 
 [libraries]
 javalin = { module = "io.javalin:javalin", version.ref = "javalin-lib" }
-javalin-rendering-jte = { module = "io.javalin:javalin-rendering-jte", version.ref = "javalin-rendering-jte-lib" }
+javalin-rendering-jte = { module = "io.javalin:javalin-rendering-jte", version.ref = "javalin-lib" }
 jte = { module = "gg.jte:jte", version.ref = "jte-lib" }
+javalin-testtool = { module = "io.javalin:javalin-testtools", version.ref = "javalin-lib" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j-simple-lib" }
 hikariCP = { module = "com.zaxxer:HikariCP", version.ref = "hikariCP-lib" }
 h2database = { module = "com.h2database:h2", version.ref = "h2database-lib" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3-lib" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql-lib" }
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj-lib" }
-javalin-testtool = { module = "io.javalin:javalin-testtools", version.ref = "javalin-testtool-lib" }
