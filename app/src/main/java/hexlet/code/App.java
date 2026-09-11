@@ -133,6 +133,10 @@ public class App {
 
                             // Обработка запросов на отображение страницы конкретного сайта
                             config.routes.get(NamedRoutes.urlPath("{id}"), UrlsController::show);
+
+                            // Обработка запросов на удаление страницы конкретного сайта
+                            config.routes.delete(
+                                    NamedRoutes.urlPath("{id}"), UrlsController::delete);
                         });
 
         return app;

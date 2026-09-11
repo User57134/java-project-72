@@ -21,6 +21,20 @@ public class UrlsController {
 
     private static final Logger log = LoggerFactory.getLogger(App.class);
 
+    private static URL parseUrl(String site) {
+        try {
+            var url = new URI(site).toURL();
+            var protocol = url.getProtocol();
+            var host = url.getHost();
+            var port = url.getPort();
+
+            return URI.create(protocol + "://" + host + ((port != -1) ? (":" + port) : "")).toURL();
+        } catch (Exception ex) {
+            log.error("Некорректный формат URL: {}", site);
+            return null;
+        }
+    }
+
     private static UrlAddingResult checkAddingResult(Context ctx) {
         String flash = ctx.consumeSessionAttribute("flash");
 
@@ -80,20 +94,6 @@ public class UrlsController {
         }
 
         ErrorReport.send(ctx, HttpStatus.NOT_FOUND, "Некорректный идентификатор сайта: " + sid);
-    }
-
-    private static URL parseUrl(String site) {
-        try {
-            var url = new URI(site).toURL();
-            var protocol = url.getProtocol();
-            var host = url.getHost();
-            var port = url.getPort();
-
-            return URI.create(protocol + "://" + host + ((port != -1) ? (":" + port) : "")).toURL();
-        } catch (Exception ex) {
-            log.error("Некорректный формат URL: {}", site);
-            return null;
-        }
     }
 
     // Обработчик запроса на добавление сайта
