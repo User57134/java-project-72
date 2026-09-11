@@ -54,9 +54,8 @@ public class UrlsController {
 
     // Обработчик запроса на отображение главной страницы (формы добавления сайта)
     public static void build(Context ctx) {
-        String flash = ctx.consumeSessionAttribute("flash");
-
         UrlAddingResult result = checkAddingResult(ctx);
+
         if (result != null) {
             ctx.render("index.jte", Map.of("result", result));
         } else {

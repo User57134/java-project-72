@@ -109,6 +109,15 @@ public class AppTest {
                     assertThat(body.contains(extendexUrl)).isFalse();
 
                     assertThat(response.body().string().contains(baseUrl)).isTrue();
+
+                    // Пробуем добавить некорректный url: добавиться не должно
+                    extendexUrl = "kfjslkdj203jljfkd920232";
+                    requestBody = "url=" + extendexUrl;
+                    response = client.post(NamedRoutes.urlsPath(), requestBody);
+                    body = response.body().string();
+                    assertThat(response.code()).isEqualTo(200);
+                    assertThat(response.body().string().contains("Анализатор страниц")).isTrue();
+                    assertThat(body.contains("Некорректный URL")).isTrue();
                 });
     }
 
@@ -199,5 +208,45 @@ public class AppTest {
                     assertThat(response.code()).isEqualTo(200);
                     assertThat(body.contains(u3.getName())).isFalse();
                 });
+    }
+
+    @Test
+    public void urlRepositoryTest() {
+        Url u1 = new Url("https://site1.io");
+        Url u2 = new Url("https://site2.com");
+        Url u3 = new Url("https://site3.ru");
+
+        UrlRepository.save(u1);
+        UrlRepository.save(u2);
+        UrlRepository.save(u3);
+
+        var urls = UrlRepository.getEntities();
+        assertThat(urls.size()).isEqualTo(3);
+
+        for (var url : urls) {
+            // Проверка поиска по идентификатору
+            assertThat(UrlRepository.find(url.getId()).isPresent()).isTrue();
+
+            // Проверка поиска по описанию
+            assertThat(UrlRepository.search(url.getName())).isNotEqualTo(0L);
+
+            // Удаление
+            assertThat(UrlRepository.delete(url.getId())).isTrue();
+
+            // Проверка поиска по описанию
+            assertThat(UrlRepository.find(url.getId()).isPresent()).isFalse();
+
+            // Проверка поиска по идентификатору
+            assertThat(UrlRepository.search(url.getName())).isEqualTo(0L);
+        }
+
+        for (var url : urls) {
+            UrlRepository.save(url);
+        }
+
+        UrlRepository.deleteAll();
+
+        urls = UrlRepository.getEntities();
+        assertThat(urls.size()).isEqualTo(0);
     }
 }
