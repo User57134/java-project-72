@@ -53,10 +53,10 @@ dependencies {
     // Подключение базы данных H2
     implementation(libs.h2database)
 
-    // Подключаем модуль рендеринга для Javalin,
+    // Подключаем модуль рендеринга для Javalin-jte,
     // implementation означает, что библиотека будет упакована внутрь вашего готового приложения
     // и будет доступна как при компиляции, так и во время работы
-    implementation(libs.javalin.rendering)
+    implementation(libs.javalin.rendering.jte)
 
     // Подключаем шаблонизатор Jte для Javalin
     implementation(libs.jte)
