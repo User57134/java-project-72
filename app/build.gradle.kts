@@ -1,3 +1,6 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 plugins {
 
     // Плагин для запуска приложения
@@ -81,6 +84,73 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+
 tasks.test {
     useJUnitPlatform()
+
+    testLogging {
+        showStandardStreams = true
+
+        // какие события показывать
+        events(
+            TestLogEvent.FAILED,
+            TestLogEvent.PASSED,
+            TestLogEvent.SKIPPED,
+            TestLogEvent.STANDARD_OUT,
+            TestLogEvent.STANDARD_ERROR,
+        )
+
+        // формат исключений
+        exceptionFormat = TestExceptionFormat.FULL
+
+        // детали
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+    }
 }
+
+
+// Точка входа из-под покрытия исключена: у класса с одним main jacoco считает
+// ещё и неявный конструктор, который никто не вызывает, и на маленьком проекте
+// это одно тянет покрытие вниз.
+val coverageExcludes = listOf("hexlet/code/App.class")
+
+
+fun JacocoReportBase.excludeEntryPoint() {
+    classDirectories.setFrom(
+        files(classDirectories.files.map { fileTree(it) { exclude(coverageExcludes) } }),
+    )
+}
+
+
+// Отчёт о покрытии считается сразу после тестов, отдельный вызов не нужен.
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    excludeEntryPoint()
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+
+tasks.test { finalizedBy(tasks.jacocoTestReport) }
+
+// Порог покрытия: ниже него `./gradlew build` падает,
+// и сборка в CI краснеет вместе с ним.
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+    excludeEntryPoint()
+    violationRules {
+        rule {
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.check { dependsOn(tasks.jacocoTestCoverageVerification) }
