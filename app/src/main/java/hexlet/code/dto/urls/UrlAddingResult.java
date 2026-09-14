@@ -1,16 +1,13 @@
 package hexlet.code.dto.urls;
 
+import hexlet.code.util.Flash;
 import lombok.*;
 
 @AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
 public class UrlAddingResult {
-    @Getter private final String input;
-
-    @Getter private String flash;
-
-    @NonNull private Boolean success;
-
-    public boolean isSuccessed() {
-        return success;
-    }
+    private String input;
+    private Flash flash;
 }

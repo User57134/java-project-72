@@ -9,6 +9,7 @@ postgresql-lib = "42.7.3"
 hikariCP-lib = "5.0.1"
 javalin-lib = "7.2.3"
 jte-lib = "3.2.4"
+unirest-lib = "3.14.5"
 commons-lang3-lib = "3.20.0"
 assertj-lib = "3.26.3"
 
@@ -28,6 +29,7 @@ javalin-testtool = { module = "io.javalin:javalin-testtools", version.ref = "jav
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j-simple-lib" }
 hikariCP = { module = "com.zaxxer:HikariCP", version.ref = "hikariCP-lib" }
 h2database = { module = "com.h2database:h2", version.ref = "h2database-lib" }
-commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3-lib" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql-lib" }
+unirest = { module = "com.konghq:unirest-java", version.ref = "unirest-lib" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3-lib" }
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj-lib" }

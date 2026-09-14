@@ -47,7 +47,9 @@ public class App {
         // DB_CLOSE_DELAY = -1 - указание базе H2 закрываться при закрытии приложения,
         // по-умолчанию закрытие базы происходит при закрытии последнего активного соединения
         return System.getenv()
-                .getOrDefault("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1");
+                .getOrDefault(
+                        "JDBC_DATABASE_URL",
+                        "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;MODE=PostgreSQL");
     }
 
     private static boolean isDevelopment() {
@@ -137,6 +139,10 @@ public class App {
                             // Обработка запросов на удаление страницы конкретного сайта
                             config.routes.delete(
                                     NamedRoutes.urlPath("{id}"), UrlsController::delete);
+
+                            // Обработка запросов на добавление проверки страницы сайта
+                            config.routes.post(
+                                    NamedRoutes.urlCheckPath("{id}"), UrlsController::createCheck);
                         });
 
         return app;

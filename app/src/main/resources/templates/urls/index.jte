@@ -12,6 +12,8 @@ content = @`
                 <th>ID</th>
                 <th>Имя</th>
                 <th>Дата создания</th>
+                <th>Последняя проверка</th>
+                <th>Код ответа</th>
             </tr>
             </thead>
 
@@ -22,6 +24,13 @@ content = @`
                         <td>${url.getId()}</td>
                         <td><a href="/urls/${url.getId()}">${url.getName()}</a></td>
                         <td>${url.getCreatedAt().toString()}</td>
+                        @if (page.getLastCheckForUrl(url.getId()) != null)
+                            <td>${page.getLastCheckForUrl(url.getId()).getCreatedAt().toString()}</td>
+                            <td>${page.getLastCheckForUrl(url.getId()).getStatusCode()}</td>
+                        @else
+                            <td>----------</td>
+                            <td>----------</td>
+                        @endif
                     </tr>
                 @endfor
                 </tbody>

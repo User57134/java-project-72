@@ -5,14 +5,14 @@
 @template.layout.page(
 content = @`
 <%-- Содержимое страницы --%>
-    @if (result != null)
-        @if (!result.isSuccessed())
+    @if (result.getFlash() != null)
+        @if (!result.getFlash().isSuccessed())
             <div class="bg-red-200">
-                <h6 class="text-taupe-800">${result.getFlash()}</h6>
+                <h6 class="text-taupe-800">${result.getFlash().getMessage()}</h6>
             </div>
         @else
             <div class="bg-green-200">
-                <h6>${result.getFlash()}</h6>
+                <h6>${result.getFlash().getMessage()}</h6>
             </div>
         @endif
     @endif
@@ -23,7 +23,7 @@ content = @`
         <form action="/urls" method="post" class="flex flex-wrap items-start gap-3">
             <div class="grow">
                 <label for="url-name" class="sr-only">Url для проверки</label>
-                @if (result != null)
+                @if (result.getInput() != null)
                     <input
                             id="url-name"
                             type="text"
