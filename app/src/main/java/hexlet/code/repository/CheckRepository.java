@@ -1,6 +1,5 @@
 package hexlet.code.repository;
 
-import hexlet.code.App;
 import hexlet.code.model.UrlCheck;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -8,12 +7,10 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class CheckRepository extends BaseRepository {
-    private static final Logger log = LoggerFactory.getLogger(App.class);
-
     public static List<UrlCheck> getEntities() {
         List<UrlCheck> urlChecks = new LinkedList<>();
 

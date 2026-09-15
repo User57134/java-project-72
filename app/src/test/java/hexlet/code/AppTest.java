@@ -3,6 +3,8 @@ package hexlet.code;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import hexlet.code.model.Url;
+import hexlet.code.model.UrlCheck;
+import hexlet.code.repository.CheckRepository;
 import hexlet.code.repository.UrlRepository;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.Javalin;
@@ -11,13 +13,29 @@ import io.javalin.testtools.TestConfig;
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.http.HttpClient;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.Comparator;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@Slf4j
 public class AppTest {
 
     private Javalin app;
+    private static MockWebServer mockServer;
+
+    private static String readFixture(String fileName) throws IOException {
+        Path fixturesPath = Path.of("src/test/resources/fixtures");
+        Path filePath = fixturesPath.resolve(fileName);
+
+        return Files.readString(filePath).trim();
+    }
 
     @BeforeEach
     public final void setUp() throws IOException, SQLException {
@@ -35,6 +53,107 @@ public class AppTest {
                     assertThat(response.code()).isEqualTo(200);
                     assertThat(response.body().string().contains("Анализатор страниц")).isTrue();
                 });
+    }
+
+    @Test
+    public void testChekForValidUrl() throws IOException {
+        try (var mws = new MockWebServer()) {
+            // установили содержимое ответа
+            mws.enqueue(
+                    new MockResponse().setResponseCode(200).setBody(readFixture("success.html")));
+
+            // запустили сервер
+            mws.start();
+
+            // Подготовка тестового url
+            Url testUrl = new Url(mws.url("/").toString());
+
+            // Сохранение в базу
+            UrlRepository.save(testUrl);
+
+            var cookieManager = new CookieManager();
+
+            var httpClient =
+                    HttpClient.newBuilder()
+                            .followRedirects(
+                                    HttpClient.Redirect.NORMAL) // разрешить перенаправления
+                            .cookieHandler(cookieManager) // добавить менеджер куки
+                            .build();
+
+            var config = new TestConfig(false, true, httpClient);
+
+            JavalinTest.test(
+                    app,
+                    config,
+                    (server, client) -> {
+                        // 1ая проверка сохраненного url и сохранение результатов в базу
+                        var response = client.post(NamedRoutes.urlCheckPath(testUrl.getId()));
+                        assertThat(response.code()).isEqualTo(200);
+                        assertThat(response.body().string().contains("Страница успешно проверена"));
+
+                        // 2ая проверка сохраненного url и сохранение результатов в базу
+                        response = client.post(NamedRoutes.urlCheckPath(testUrl.getId()));
+                        assertThat(response.code()).isEqualTo(200);
+
+                        // Проверка, что сохранены обе проверки
+                        List<UrlCheck> checks = CheckRepository.getAllChecksForUrl(testUrl.getId());
+                        assertThat(checks.size()).isEqualTo(2);
+
+                        var expectedLastCheck = CheckRepository.getLastCheckForUrl(testUrl.getId());
+
+                        var lastCheck =
+                                checks.stream()
+                                        .sorted(
+                                                Comparator.comparing(UrlCheck::getCreatedAt)
+                                                        .reversed())
+                                        .findFirst();
+
+                        assertThat(
+                                        expectedLastCheck
+                                                .getCreatedAt()
+                                                .equals(lastCheck.get().getCreatedAt()))
+                                .isTrue();
+                    });
+        }
+    }
+
+    @Test
+    public void testChekForInvalidUrl() throws IOException {
+        try (var mws = new MockWebServer()) {
+            // установили содержимое ответа
+            mws.enqueue(new MockResponse().setResponseCode(404).setBody(readFixture("fail.html")));
+
+            // запустили сервер
+            mws.start();
+
+            // Подготовка тестового url
+            Url testUrl = new Url(mws.url("/").toString());
+
+            // Сохранение в базу
+            UrlRepository.save(testUrl);
+
+            var cookieManager = new CookieManager();
+
+            var httpClient =
+                    HttpClient.newBuilder()
+                            .followRedirects(
+                                    HttpClient.Redirect.NORMAL) // разрешить перенаправления
+                            .cookieHandler(cookieManager) // добавить менеджер куки
+                            .build();
+
+            var config = new TestConfig(false, true, httpClient);
+
+            JavalinTest.test(
+                    app,
+                    config,
+                    (server, client) -> {
+                        // 1ая проверка сохраненного url и сохранение результатов в базу
+                        var response = client.post(NamedRoutes.urlCheckPath(testUrl.getId()));
+                        assertThat(response.code()).isEqualTo(200);
+                        assertThat(
+                                response.body().string().contains("Произошла ошибка при проверке"));
+                    });
+        }
     }
 
     @Test
@@ -166,15 +285,16 @@ public class AppTest {
                     assertThat(body.contains("Сайт")).isTrue();
                     assertThat(body.contains(u3.getName())).isTrue();
 
-                    /* Стандартный HttpClient в Java при редиректах NORMAL для некоторых
-                    статусов (cогласно спецификации
-                                        * HTTP) может сохранять исходный метод запроса: то есть после запроса
-                    'DELETE /urls/id' будет
-                                        * выполняться запрос DELETE /urls, а не GET /urls.
-                                        * Поэтому автоматический редирект не подходит и нужно вручную после
-                    вызова метода DELETE получить
-                                        * сообщение о перенаправлении и перейти по указанному адресу.
-                                        **/
+                    /* Стандартный HttpClient в Java при редиректах NORMAL
+                     * для некоторых статусов (cогласно спецификации HTTP)
+                     * может сохранять исходный метод запроса: то есть после
+                     * запроса 'DELETE /urls/id' будет выполняться запрос
+                     * DELETE /urls, а не GET /urls.
+                     * Поэтому автоматический редирект не подходит и нужно
+                     * вручную после вызова метода DELETE получить
+                     * сообщение о перенаправлении и перейти по указанному адресу.
+                     **/
+
                     // удаление первого сайта
                     response = client.delete("/urls/" + id1);
 
@@ -215,6 +335,46 @@ public class AppTest {
 
     @Test
     public void urlRepositoryTest() {
+        Url u1 = new Url("https://site1.io");
+        Url u2 = new Url("https://site2.com");
+        Url u3 = new Url("https://site3.ru");
+
+        UrlRepository.save(u1);
+        UrlRepository.save(u2);
+        UrlRepository.save(u3);
+
+        var urls = UrlRepository.getEntities();
+        assertThat(urls.size()).isEqualTo(3);
+
+        for (var url : urls) {
+            // Проверка поиска по идентификатору
+            assertThat(UrlRepository.find(url.getId()).isPresent()).isTrue();
+
+            // Проверка поиска по описанию
+            assertThat(UrlRepository.search(url.getName())).isNotEqualTo(0L);
+
+            // Удаление
+            assertThat(UrlRepository.delete(url.getId())).isTrue();
+
+            // Проверка поиска по описанию
+            assertThat(UrlRepository.find(url.getId()).isPresent()).isFalse();
+
+            // Проверка поиска по идентификатору
+            assertThat(UrlRepository.search(url.getName())).isEqualTo(0L);
+        }
+
+        for (var url : urls) {
+            UrlRepository.save(url);
+        }
+
+        UrlRepository.deleteAll();
+
+        urls = UrlRepository.getEntities();
+        assertThat(urls.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void urlCheckAddingTest() {
         Url u1 = new Url("https://site1.io");
         Url u2 = new Url("https://site2.com");
         Url u3 = new Url("https://site3.ru");

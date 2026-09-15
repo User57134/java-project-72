@@ -1,7 +1,6 @@
 package hexlet.code.repository;
 
 import hexlet.code.model.Url;
-import hexlet.code.model.UrlCheck;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -9,7 +8,9 @@ import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class UrlRepository extends BaseRepository {
 
     public static List<Url> getEntities() {
@@ -66,45 +67,6 @@ public class UrlRepository extends BaseRepository {
 
         } catch (SQLException ex) {
             log.error("UrlRepository::save() error: {}", ex.getMessage());
-            return 0L;
-        }
-    }
-
-    public static long saveCheck(UrlCheck check) {
-        String sql =
-                "INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at) VALUES(?, ?, ?, ?, ?, ?)";
-        Long id = null;
-
-        try (var connection = dataSource.getConnection()) {
-            var preparedStatement =
-                    connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-
-            preparedStatement.setLong(1, check.getUrlId());
-            preparedStatement.setInt(2, check.getStatusCode());
-            preparedStatement.setString(3, check.getH1());
-            preparedStatement.setString(4, check.getTitle());
-            preparedStatement.setString(5, check.getDescription());
-
-            Instant createdAt = Instant.now();
-            check.setCreatedAt(createdAt);
-            preparedStatement.setTimestamp(6, Timestamp.from(check.getCreatedAt()));
-
-            preparedStatement.executeUpdate();
-
-            var generatedKey = preparedStatement.getGeneratedKeys();
-            if (generatedKey.next()) {
-                id = generatedKey.getLong(1);
-                check.setId(id);
-                return id;
-            } else {
-                log.error(
-                        "DB has not returned an id after saving a check for the url: "
-                                + check.getUrlId());
-                return 0L;
-            }
-
-        } catch (SQLException ex) {
-            log.error("UrlRepository::saveCheck() error: {}", ex.getMessage());
             return 0L;
         }
     }

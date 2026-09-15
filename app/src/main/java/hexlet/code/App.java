@@ -19,15 +19,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class App {
     private static final Path TEMPLATES_PATH = Path.of("src", "main", "resources", "templates");
     private static final Path STATIC_PATH = Path.of("src", "main", "resources", "static");
     private static final Path JTE_CLASSES_PATH = Path.of("jte-classes");
-
-    private static final Logger logger = LoggerFactory.getLogger(App.class);
 
     private static String getMode() {
         return System.getenv().getOrDefault("APP_ENV", "production");
@@ -83,7 +81,7 @@ public class App {
     }
 
     public static Javalin getApp() {
-        logger.info(
+        log.info(
                 "Applications is started in "
                         + (isDevelopment() ? " a development mode" : "production mode"));
 

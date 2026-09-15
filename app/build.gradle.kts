@@ -50,12 +50,12 @@ dependencies {
     // Подключение веб-фреймворка Javalin
     implementation(libs.javalin)
 
-    // Подключаем модуль рендеринга для Javalin-jte,
+    // Подключение модуля рендеринга для Javalin-jte,
     // implementation означает, что библиотека будет упакована внутрь вашего готового приложения
     // и будет доступна как при компиляции, так и во время работы
     implementation(libs.javalin.rendering.jte)
 
-    // Подключаем шаблонизатор Jte для Javalin
+    // Подключение шаблонизатора Jte для Javalin
     implementation(libs.jte)
 
     // Подключение фасада для обработки логов совместно с простейшей реализацией
@@ -73,7 +73,7 @@ dependencies {
     // Подключение библиотеки Unirest для выполнения запросов http
     implementation(libs.unirest)
 
-    // Подключаем библиотеку commons-lang3-lib для обработки чисел
+    // Подключение библиотеки commons-lang3-lib для обработки чисел
     implementation(libs.commons.lang3)
 
     // Подключается для тестирования: assertThat
@@ -81,6 +81,9 @@ dependencies {
 
     // Подключается для тестирования Javalin
     testImplementation(libs.javalin.testtool)
+
+    // Подключение веб-сервера для тестирования http клиентов
+    testImplementation(libs.mockwebserver)
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -150,7 +153,7 @@ tasks.jacocoTestCoverageVerification {
             limit {
                 counter = "INSTRUCTION"
                 value = "COVEREDRATIO"
-                minimum = "0.10".toBigDecimal()
+                minimum = "0.80".toBigDecimal()
             }
         }
     }
