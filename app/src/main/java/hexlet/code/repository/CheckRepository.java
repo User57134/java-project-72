@@ -55,7 +55,7 @@ public class CheckRepository extends BaseRepository {
             var preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setLong(1, urlId);
 
-            var resultSet = preparedStatement.executeQuery(sql);
+            var resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 var id = resultSet.getLong(1);
@@ -79,13 +79,13 @@ public class CheckRepository extends BaseRepository {
     }
 
     public static UrlCheck getLastCheckForUrl(long urlId) {
-        String sql = "SELECT * FROM url_checks WHERE url_id = ? ORDER BY DESC LIMIT 1";
+        String sql = "SELECT * FROM url_checks WHERE url_id = ? ORDER BY created_at DESC LIMIT 1";
 
         try (var connection = dataSource.getConnection()) {
             var preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setLong(1, urlId);
 
-            var resultSet = preparedStatement.executeQuery(sql);
+            var resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
                 var id = resultSet.getLong(1);

@@ -1,4 +1,6 @@
+@import hexlet.code.util.SystemDateTime
 @import hexlet.code.dto.urls.UrlsPage
+
 
 @param UrlsPage page
 
@@ -23,9 +25,9 @@ content = @`
                     <tr>
                         <td>${url.getId()}</td>
                         <td><a href="/urls/${url.getId()}">${url.getName()}</a></td>
-                        <td>${url.getCreatedAt().toString()}</td>
+                        <td>${SystemDateTime.format(url.getCreatedAt())}</td>
                         @if (page.getLastCheckForUrl(url.getId()) != null)
-                            <td>${page.getLastCheckForUrl(url.getId()).getCreatedAt().toString()}</td>
+                            <td>${SystemDateTime.format(page.getLastCheckForUrl(url.getId()).getCreatedAt())}</td>
                             <td>${page.getLastCheckForUrl(url.getId()).getStatusCode()}</td>
                         @else
                             <td>----------</td>

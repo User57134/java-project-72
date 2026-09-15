@@ -16,6 +16,8 @@ import io.javalin.http.HttpStatus;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
+import kong.unirest.Unirest;
+import kong.unirest.UnirestException;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +94,7 @@ public class UrlsController {
                     }
                 }
 
+                var all = CheckRepository.getEntities();
                 var checks = CheckRepository.getAllChecksForUrl(id);
                 if (!checks.isEmpty()) {
                     page.setChecks(checks);
@@ -145,10 +148,14 @@ public class UrlsController {
     }
 
     private static UrlCheck check(Url url) {
-        UrlCheck result = new UrlCheck();
+        try {
+            var response = Unirest.get(url.getName()).asString();
+            return new UrlCheck(url, response.getStatus());
+        } catch (UnirestException ex) {
+            log.error(ex.getMessage());
+        }
 
-        result.setUrlId(url.getId());
-        return result;
+        return new UrlCheck(url, 404);
     }
 
     // Обработчик запроса на добавление сайта

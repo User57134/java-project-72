@@ -1,4 +1,4 @@
-@import hexlet.code.dto.urls.UrlAddingResult
+@import hexlet.code.util.SystemDateTime
 @import hexlet.code.dto.urls.UrlPage
 
 @param UrlPage page
@@ -35,7 +35,7 @@ content = @`
                 </tr>
                 <tr>
                     <td>Дата создания</td>
-                    <td>${page.getUrl().getCreatedAt().toString()}</td>
+                    <td>${SystemDateTime.format(page.getUrl().getCreatedAt())}</td>
                 </tr>
                 </tbody>
             </table>
@@ -64,7 +64,7 @@ content = @`
                         <tr>
                             <td>${check.getId()}</td>
                             <td>${check.getStatusCode()}</td>
-                            <td>${check.getCreatedAt().toString()}</td>
+                            <td>${SystemDateTime.format(check.getCreatedAt())}</td>
                         </tr>
                     @endfor
                     </tbody>

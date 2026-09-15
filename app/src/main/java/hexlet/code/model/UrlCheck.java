@@ -8,8 +8,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class UrlCheck {
     private Long id;
     private int statusCode;
@@ -18,4 +18,10 @@ public class UrlCheck {
     private String description;
     private Long urlId;
     private Instant createdAt;
+
+    public UrlCheck(Url url, int status) {
+        urlId = url.getId();
+        statusCode = status;
+        createdAt = Instant.now();
+    }
 }
