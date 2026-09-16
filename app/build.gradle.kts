@@ -73,6 +73,9 @@ dependencies {
     // Подключение библиотеки Unirest для выполнения запросов http
     implementation(libs.unirest)
 
+    // Подключение библиотеки Jsoup для разбора html
+    implementation(libs.jsoup)
+
     // Подключение библиотеки commons-lang3-lib для обработки чисел
     implementation(libs.commons.lang3)
 

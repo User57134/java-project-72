@@ -22,6 +22,15 @@ public class UrlCheck {
     public UrlCheck(Url url, int status) {
         urlId = url.getId();
         statusCode = status;
-        createdAt = Instant.now();
+    }
+
+    public UrlCheck(
+            Url url, int status, String titleContent, String h1Content, String descriptionContent) {
+        urlId = url.getId();
+        statusCode = status;
+
+        title = titleContent;
+        h1 = h1Content;
+        description = descriptionContent;
     }
 }

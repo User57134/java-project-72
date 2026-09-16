@@ -120,8 +120,9 @@ public class CheckRepository extends BaseRepository {
             preparedStatement.setString(4, check.getTitle());
             preparedStatement.setString(5, check.getDescription());
 
-            Instant createdAt = Instant.now();
-            check.setCreatedAt(createdAt);
+            if (check.getCreatedAt() == null) {
+                check.setCreatedAt(Instant.now());
+            }
             preparedStatement.setTimestamp(6, Timestamp.from(check.getCreatedAt()));
 
             preparedStatement.executeUpdate();

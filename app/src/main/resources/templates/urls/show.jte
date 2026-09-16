@@ -1,4 +1,5 @@
 @import hexlet.code.util.SystemDateTime
+@import hexlet.code.util.CorrectDisplay
 @import hexlet.code.dto.urls.UrlPage
 
 @param UrlPage page
@@ -8,63 +9,78 @@ content = @`
 <%-- Содержимое страницы --%>
     @if (page.getFlash() != null)
         @if (!page.getFlash().isSuccessed())
-            <div class="bg-red-200">
-                <h6 class="text-taupe-800">${page.getFlash().getMessage()}</h6>
+            <div class="max-w-7xl mx-auto mb-4 px-4">
+                <div class="bg-red-100 border border-red-200 text-red-900 px-4 py-3 rounded-xl shadow-sm flex items-center gap-2">
+                    <h6 class="font-medium text-sm sm:text-base">
+                        ${page.getFlash().getMessage()}
+                    </h6>
+                </div>
             </div>
         @else
-            <div class="bg-green-200">
-                <h6>${page.getFlash().getMessage()}</h6>
+            <div class="max-w-7xl mx-auto mb-4 px-4">
+                <div class="bg-green-100 border border-green-200 text-green-800 px-4 py-3 rounded-xl shadow-sm flex items-center gap-2">
+                    <h6 class="font-medium text-sm sm:text-base">
+                        ${page.getFlash().getMessage()}
+                    </h6>
+                </div>
             </div>
         @endif
     @endif
 
-    <div class="mx-auto max-w-3xl rounded-lg border border-gray-200 bg-gray-50 p-10">
+    <div class="mx-auto max-w-5xl rounded-lg border border-gray-200 bg-gray-50 p-10">
         <section>
+            <h1 class="text-3xl font-serif font-bold text-slate-800 tracking-tight mb-4">
+                Сайт: <span class="font-medium text-blue-900">${page.getUrl().getName()}</span>
+            </h1>
 
-            <h2>Сайт: ${page.getUrl().getName()}</h2>
-
-            <table data-test="url">
+            <table data-test="url" class="text-ellipsis w-full border-collapse border border-gray-300">
                 <tbody>
                 <tr>
-                    <td>ID</td>
-                    <td>${page.getUrl().getId()}</td>
+                    <td class="border border-gray-300 px-4 py-2 font-bold">ID</td>
+                    <td class="border border-gray-300 px-4 py-2">${page.getUrl().getId()}</td>
                 </tr>
                 <tr>
-                    <td>Имя</td>
-                    <td>${page.getUrl().getName()}</td>
+                    <td class="border border-gray-300 px-4 py-2 font-bold">Имя</td>
+                    <td class="border border-gray-300 px-4 py-2">${page.getUrl().getName()}</td>
                 </tr>
                 <tr>
-                    <td>Дата создания</td>
-                    <td>${SystemDateTime.format(page.getUrl().getCreatedAt())}</td>
+                    <td class="border border-gray-300 px-4 py-2 font-bold">Дата создания</td>
+                    <td class="border border-gray-300 px-4 py-2">${SystemDateTime.format(page.getUrl().getCreatedAt())}</td>
                 </tr>
                 </tbody>
             </table>
         </section>
 
         <section>
+            <h2 class="text-2xl font-bold text-slate-700 tracking-tight mb-4 mt-4">Проверки</h2>
 
-            <h2>Проверки</h2>
-
-            <form method="post" action="/urls/${page.getUrl().getId()}/checks" >
-                <input type="submit" value="Запустить проверку">
+            <form method="post" action="/urls/${page.getUrl().getId()}/checks">
+                <input type="submit" value="Запустить проверку"
+                       class="w-full bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed">
             </form>
 
-            <table data-test="checks">
+            <table data-test="checks" class="w-full border-collapse border border-gray-300">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Код ответа</th>
-                        <th>Дата создания</th>
-                    </tr>
+                <tr class="bg-gray-100">
+                    <th class="border border-gray-300 px-4 py-2">ID</th>
+                    <th class="border border-gray-300 px-4 py-2">Код ответа</th>
+                    <th class="border border-gray-300 px-4 py-2">h1</th>
+                    <th class="border border-gray-300 px-4 py-2">title</th>
+                    <th class="border border-gray-300 px-4 py-2">description</th>
+                    <th class="border border-gray-300 px-4 py-2">Дата создания</th>
+                </tr>
                 </thead>
 
                 @if (page.getChecks() != null)
                     <tbody>
                     @for(var check : page.getChecks())
                         <tr>
-                            <td>${check.getId()}</td>
-                            <td>${check.getStatusCode()}</td>
-                            <td>${SystemDateTime.format(check.getCreatedAt())}</td>
+                            <td class="border border-gray-300 px-4 py-2">${check.getId()}</td>
+                            <td class="border border-gray-300 px-4 py-2">${check.getStatusCode()}</td>
+                            <td class="border border-gray-300 px-4 py-2">${CorrectDisplay.apply(check.getH1())}</td>
+                            <td class="border border-gray-300 px-4 py-2">${CorrectDisplay.apply(check.getTitle())}</td>
+                            <td class="border border-gray-300 px-4 py-2">${CorrectDisplay.apply(check.getDescription())}</td>
+                            <td class="border border-gray-300 px-4 py-2">${SystemDateTime.format(check.getCreatedAt())}</td>
                         </tr>
                     @endfor
                     </tbody>
@@ -75,13 +91,4 @@ content = @`
 
 `
 ,
-footer = @`
-<%-- Содержимое нижнего колонтитула --%>
-    <span>Все права защищены. ©</span>
-`
-,
-title = @`
-<%-- Содержимое заголовка страницы --%>
-    Страница сайта
-`
-)
+title = @`Страница сайта`)

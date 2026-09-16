@@ -10,6 +10,7 @@ hikariCP-lib = "5.0.1"
 javalin-lib = "7.2.3"
 jte-lib = "3.2.4"
 unirest-lib = "3.14.5"
+jsoup-lib = "1.23.2"
 commons-lang3-lib = "3.20.0"
 assertj-lib = "3.26.3"
 mockwebserver-lib = "5.5.0"
@@ -32,6 +33,7 @@ hikariCP = { module = "com.zaxxer:HikariCP", version.ref = "hikariCP-lib" }
 h2database = { module = "com.h2database:h2", version.ref = "h2database-lib" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql-lib" }
 unirest = { module = "com.konghq:unirest-java", version.ref = "unirest-lib" }
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup-lib" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3-lib" }
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj-lib" }
 mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "mockwebserver-lib" }

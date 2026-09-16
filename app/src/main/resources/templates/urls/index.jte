@@ -7,15 +7,14 @@
 @template.layout.page(
 content = @`
 <%-- Содержимое страницы --%>
-    <div class="mx-auto max-w-3xl rounded-lg border border-gray-200 bg-gray-50 p-10">
-        <table data-test="urls">
+    <div class="mx-auto max-w-5xl rounded-lg border border-gray-200 bg-gray-50 p-10">
+        <table data-test="urls" class="w-full border-collapse border border-gray-300">
             <thead>
-            <tr>
-                <th>ID</th>
-                <th>Имя</th>
-                <th>Дата создания</th>
-                <th>Последняя проверка</th>
-                <th>Код ответа</th>
+            <tr class="bg-gray-100">
+                <th class="border border-gray-300 px-4 py-2 text-left">ID</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Имя</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Последняя проверка</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Код ответа</th>
             </tr>
             </thead>
 
@@ -23,15 +22,14 @@ content = @`
                 <tbody>
                 @for(var url : page.getUrls())
                     <tr>
-                        <td>${url.getId()}</td>
-                        <td><a href="/urls/${url.getId()}">${url.getName()}</a></td>
-                        <td>${SystemDateTime.format(url.getCreatedAt())}</td>
+                        <td class="border border-gray-300 px-4 py-2">${url.getId()}</td>
+                        <td class="border border-gray-300 px-4 py-2"><a href="/urls/${url.getId()}" class="text-amber-950 hover:text-amber-600 transition-colors duration-200 font-medium">${url.getName()}</a></td>
                         @if (page.getLastCheckForUrl(url.getId()) != null)
-                            <td>${SystemDateTime.format(page.getLastCheckForUrl(url.getId()).getCreatedAt())}</td>
-                            <td>${page.getLastCheckForUrl(url.getId()).getStatusCode()}</td>
+                            <td class="border border-gray-300 px-4 py-2">${SystemDateTime.format(page.getLastCheckForUrl(url.getId()).getCreatedAt())}</td>
+                            <td class="border border-gray-300 px-4 py-2">${page.getLastCheckForUrl(url.getId()).getStatusCode()}</td>
                         @else
-                            <td>----------</td>
-                            <td>----------</td>
+                            <td class="border border-gray-300 px-4 py-2"></td>
+                            <td class="border border-gray-300 px-4 py-2"></td>
                         @endif
                     </tr>
                 @endfor
@@ -42,13 +40,4 @@ content = @`
 
 `
 ,
-footer = @`
-<%-- Содержимое нижнего колонтитула --%>
-    <span>Все права защищены. ©</span>
-`
-,
-title = @`
-<%-- Содержимое заголовка страницы --%>
-    Сайты
-`
-)
+title = @`Сайты`)

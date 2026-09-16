@@ -17,8 +17,8 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import kong.unirest.Unirest;
-import kong.unirest.UnirestException;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,15 +147,55 @@ public class UrlsController {
         }
     }
 
-    private static UrlCheck check(Url url) {
+    public static Map<String, String> parseHtml(String body) {
+        Map<String, String> result = new HashMap<>();
+        String title = null;
+        String h1 = null;
+        String description = null;
+
         try {
-            var response = Unirest.get(url.getName()).asString();
-            return new UrlCheck(url, response.getStatus());
-        } catch (UnirestException ex) {
+            var doc = Jsoup.parse(body);
+
+            title = doc.title();
+
+            var h1Tag = doc.selectFirst("h1");
+            if (h1Tag != null) {
+                h1 = h1Tag.text();
+            }
+
+            var metaDescription = doc.selectFirst("meta[name=description]");
+            if (metaDescription != null) {
+                description = metaDescription.attr("content");
+            }
+        } catch (Exception ex) {
             log.error(ex.getMessage());
         }
 
-        return new UrlCheck(url, 404);
+        result.put("title", title);
+        result.put("h1", h1);
+        result.put("description", description);
+
+        return result;
+    }
+
+    private static UrlCheck check(Url url) {
+        try {
+            var response = Unirest.get(url.getName()).asString();
+            var body = response.getBody();
+
+            var tagValues = parseHtml(body);
+
+            return new UrlCheck(
+                    url,
+                    response.getStatus(),
+                    tagValues.get("title"),
+                    tagValues.get("h1"),
+                    tagValues.get("description"));
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+        }
+
+        return null;
     }
 
     // Обработчик запроса на добавление сайта
@@ -169,18 +209,21 @@ public class UrlsController {
             if (url.isPresent()) {
                 var ulrCheck = check(url.get());
 
-                if (CheckRepository.save(ulrCheck) == 0L) {
-                    ErrorReport.send(
-                            ctx,
-                            HttpStatus.INTERNAL_SERVER_ERROR,
-                            "Ошибка при сохранении проверки");
-                    return;
-                }
+                if (ulrCheck != null) {
+                    if (CheckRepository.save(ulrCheck) == 0L) {
+                        ErrorReport.send(
+                                ctx,
+                                HttpStatus.INTERNAL_SERVER_ERROR,
+                                "Ошибка при сохранении проверки");
+                        return;
+                    }
 
-                if (ulrCheck.getStatusCode() == 200) {
                     ctx.sessionAttribute("flash", "Страница успешно проверена");
                     ctx.sessionAttribute("status", Boolean.TRUE);
+
                 } else {
+                    log.info("UrsController::createCheck(null)");
+
                     ctx.sessionAttribute("flash", "Произошла ошибка при проверке");
                     ctx.sessionAttribute("status", Boolean.FALSE);
                 }

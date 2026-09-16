@@ -2,10 +2,12 @@ package hexlet.code;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import hexlet.code.controller.UrlsController;
 import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.CheckRepository;
 import hexlet.code.repository.UrlRepository;
+import hexlet.code.util.CorrectDisplay;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
@@ -16,7 +18,9 @@ import java.net.http.HttpClient;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.Comparator;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.mockwebserver.MockResponse;
@@ -28,13 +32,36 @@ import org.junit.jupiter.api.Test;
 public class AppTest {
 
     private Javalin app;
-    private static MockWebServer mockServer;
+
+    private static HttpClient redirectableHttpClient = null;
 
     private static String readFixture(String fileName) throws IOException {
         Path fixturesPath = Path.of("src/test/resources/fixtures");
         Path filePath = fixturesPath.resolve(fileName);
 
         return Files.readString(filePath).trim();
+    }
+
+    private static HttpClient getRedirectableHttpClient() {
+        /*
+         *  Необходимо включить менеджер куки (чтобы не терялись сессионные атрибуты:
+         *  в данном случае без менеджера потеряется флеш-сообщение
+         *  об успешном или неудачном добавлении страницы),
+         * */
+        var cookieManager = new CookieManager();
+
+        if (redirectableHttpClient == null) {
+            redirectableHttpClient =
+                    HttpClient.newBuilder()
+                            .followRedirects(
+                                    HttpClient.Redirect.NORMAL) // разрешить перенаправления
+                            .cookieHandler(cookieManager) // добавить менеджер куки
+                            .connectTimeout(
+                                    Duration.ofSeconds(1)) // ограничить время ожидания 2 сек
+                            .build();
+        }
+
+        return redirectableHttpClient;
     }
 
     @BeforeEach
@@ -58,11 +85,12 @@ public class AppTest {
     @Test
     public void testChekForValidUrl() throws IOException {
         try (var mws = new MockWebServer()) {
-            // установили содержимое ответа
-            mws.enqueue(
-                    new MockResponse().setResponseCode(200).setBody(readFixture("success.html")));
+            var testHtml = readFixture("test.html");
 
-            // запустили сервер
+            // Установили содержимое ответа
+            mws.enqueue(new MockResponse().setResponseCode(200).setBody(testHtml));
+
+            // Запустили сервер
             mws.start();
 
             // Подготовка тестового url
@@ -71,47 +99,33 @@ public class AppTest {
             // Сохранение в базу
             UrlRepository.save(testUrl);
 
-            var cookieManager = new CookieManager();
+            // Убеждаемся, что проверок для testUrl еще не было
+            assertThat(CheckRepository.getLastCheckForUrl(testUrl.getId())).isNull();
 
-            var httpClient =
-                    HttpClient.newBuilder()
-                            .followRedirects(
-                                    HttpClient.Redirect.NORMAL) // разрешить перенаправления
-                            .cookieHandler(cookieManager) // добавить менеджер куки
-                            .build();
-
-            var config = new TestConfig(false, true, httpClient);
+            var config = new TestConfig(false, true, getRedirectableHttpClient());
 
             JavalinTest.test(
                     app,
                     config,
                     (server, client) -> {
-                        // 1ая проверка сохраненного url и сохранение результатов в базу
+                        // Отправка обработчику Javalin запроса с адресом testUrl для проверки и
+                        // сохранение результатов в базу
                         var response = client.post(NamedRoutes.urlCheckPath(testUrl.getId()));
                         assertThat(response.code()).isEqualTo(200);
-                        assertThat(response.body().string().contains("Страница успешно проверена"));
+                        assertThat(response.body().string().contains("Страница успешно проверена"))
+                                .isTrue();
 
-                        // 2ая проверка сохраненного url и сохранение результатов в базу
-                        response = client.post(NamedRoutes.urlCheckPath(testUrl.getId()));
-                        assertThat(response.code()).isEqualTo(200);
+                        // Убеждаемся, что для testUrl теперь есть проверка
+                        var lastCheck = CheckRepository.getLastCheckForUrl(testUrl.getId());
+                        assertThat(lastCheck).isNotNull();
 
-                        // Проверка, что сохранены обе проверки
-                        List<UrlCheck> checks = CheckRepository.getAllChecksForUrl(testUrl.getId());
-                        assertThat(checks.size()).isEqualTo(2);
+                        // Сверяем данные результатов проверки с testHtml
+                        var tagValues = UrlsController.parseHtml(testHtml);
 
-                        var expectedLastCheck = CheckRepository.getLastCheckForUrl(testUrl.getId());
-
-                        var lastCheck =
-                                checks.stream()
-                                        .sorted(
-                                                Comparator.comparing(UrlCheck::getCreatedAt)
-                                                        .reversed())
-                                        .findFirst();
-
-                        assertThat(
-                                        expectedLastCheck
-                                                .getCreatedAt()
-                                                .equals(lastCheck.get().getCreatedAt()))
+                        assertThat(lastCheck.getUrlId().equals(testUrl.getId())).isTrue();
+                        assertThat(lastCheck.getTitle().equals(tagValues.get("title"))).isTrue();
+                        assertThat(lastCheck.getH1().equals(tagValues.get("h1"))).isTrue();
+                        assertThat(lastCheck.getDescription().equals(tagValues.get("description")))
                                 .isTrue();
                     });
         }
@@ -119,62 +133,113 @@ public class AppTest {
 
     @Test
     public void testChekForInvalidUrl() throws IOException {
-        try (var mws = new MockWebServer()) {
-            // установили содержимое ответа
-            mws.enqueue(new MockResponse().setResponseCode(404).setBody(readFixture("fail.html")));
+        /*
+         * Домены .localhost и .invalid будут обрабатываться локально, поэтому
+         * при попытке соединения по данному url мгновенно возникнет исключение
+         * UnknownHostException.
+         * */
+        String invalidUrl = "http://dummy.invalid";
+        // Подготовка тестового url
+        Url testUrl = new Url(invalidUrl);
 
-            // запустили сервер
-            mws.start();
+        // Сохранение в базу
+        UrlRepository.save(testUrl);
 
-            // Подготовка тестового url
-            Url testUrl = new Url(mws.url("/").toString());
+        var config = new TestConfig(false, true, getRedirectableHttpClient());
 
-            // Сохранение в базу
-            UrlRepository.save(testUrl);
+        JavalinTest.test(
+                app,
+                config,
+                (server, client) -> {
+                    // Отправка обработчику Javalin запроса с адресом testUrl для проверки и
+                    // сохранение результатов в базу
+                    var response = client.post(NamedRoutes.urlCheckPath(testUrl.getId()));
+                    assertThat(response.code()).isEqualTo(200);
 
-            var cookieManager = new CookieManager();
-
-            var httpClient =
-                    HttpClient.newBuilder()
-                            .followRedirects(
-                                    HttpClient.Redirect.NORMAL) // разрешить перенаправления
-                            .cookieHandler(cookieManager) // добавить менеджер куки
-                            .build();
-
-            var config = new TestConfig(false, true, httpClient);
-
-            JavalinTest.test(
-                    app,
-                    config,
-                    (server, client) -> {
-                        // 1ая проверка сохраненного url и сохранение результатов в базу
-                        var response = client.post(NamedRoutes.urlCheckPath(testUrl.getId()));
-                        assertThat(response.code()).isEqualTo(200);
-                        assertThat(
-                                response.body().string().contains("Произошла ошибка при проверке"));
-                    });
-        }
+                    var body = response.getBody().string();
+                    assertThat(body.contains("Произошла ошибка при проверке")).isTrue();
+                });
     }
 
     @Test
+    public void testCheckRepository() throws IOException {
+        Url testUrl1 = new Url("http://test1.com");
+        Long id = UrlRepository.save(testUrl1);
+        assertThat(id > 0).isTrue();
+
+        Url testUrl2 = new Url("http://test2.com");
+        id = UrlRepository.save(testUrl2);
+        assertThat(id > 0).isTrue();
+
+        Instant createdAt = Instant.now();
+
+        UrlCheck urlCheck1 = new UrlCheck(testUrl1, 200);
+        urlCheck1.setTitle("Url1 check1");
+        urlCheck1.setCreatedAt(createdAt);
+        Long id1 = CheckRepository.save(urlCheck1);
+        assertThat(id1 > 0).isTrue();
+
+        UrlCheck urlCheck2 = new UrlCheck(testUrl1, 200);
+        urlCheck2.setTitle("Url1 check2");
+        urlCheck2.setCreatedAt(createdAt.plus(1, ChronoUnit.HOURS));
+        Long id2 = CheckRepository.save(urlCheck2);
+        assertThat(id2 > 0).isTrue();
+        assertThat(id2.equals(id1)).isFalse();
+
+        UrlCheck urlCheck3 = new UrlCheck(testUrl1, 200);
+        urlCheck3.setTitle("Url1 check3");
+        urlCheck3.setCreatedAt(createdAt.plus(2, ChronoUnit.HOURS));
+        Long id3 = CheckRepository.save(urlCheck3);
+        assertThat(id3 > 0).isTrue();
+        assertThat(id3.equals(id1)).isFalse();
+        assertThat(id3.equals(id2)).isFalse();
+
+        UrlCheck urlCheck4 = new UrlCheck(testUrl2, 200);
+        urlCheck4.setTitle("Url2 check1");
+        urlCheck4.setCreatedAt(createdAt);
+        id = CheckRepository.save(urlCheck4);
+        assertThat(id > 0).isTrue();
+
+        var config = new TestConfig(false, true, getRedirectableHttpClient());
+
+        JavalinTest.test(
+                app,
+                config,
+                (server, client) -> {
+
+                    // Проверить, что всего проверок 4
+                    List<UrlCheck> allChecks = CheckRepository.getEntities();
+                    assertThat(allChecks.size()).isEqualTo(4);
+
+                    // Проверить, что для url#1 проверок 3
+                    List<UrlCheck> checks = CheckRepository.getAllChecksForUrl(testUrl1.getId());
+                    assertThat(checks.size()).isEqualTo(3);
+
+                    // Проверить правильность времени последней проверки для url#1
+                    var result = CheckRepository.getLastCheckForUrl(testUrl1.getId());
+                    assertThat(result != null).isTrue();
+
+                    var lastCheck = checks.getFirst().getCreatedAt();
+                    for (var check : checks) {
+                        if (check.getCreatedAt().isAfter(lastCheck)) {
+                            lastCheck = check.getCreatedAt();
+                        }
+                    }
+
+                    assertThat(result.getCreatedAt().equals(lastCheck)).isTrue();
+                });
+    }
+
+    /*
+     *  Так как при добавлении url происходит перенаправление на другую страницу:
+     *  после добавления url и происходит перенаправление на информационную страницу
+     *  для этого url. Для обработки этого в конфигурации необходимо указать клиента
+     *  способного автоматически переходить на другую страницу, либо обрабатывать такие
+     *  переходы вручную.
+     * */
+    @Test
     public void testAddingUrl() {
-        var cookieManager = new CookieManager();
-
-        var httpClient =
-                HttpClient.newBuilder()
-                        .followRedirects(HttpClient.Redirect.NORMAL) // разрешить перенаправления
-                        .cookieHandler(cookieManager) // добавить менеджер куки
-                        .build();
-
-        /*
-         *  Так как при добавлении url происходит перенаправление на другую страницу:
-         *  добавляется url и перенаправляется на информационную страницу для этого
-         *  url, то в конфигурации необходимо разрешить автоматическое перенаправление
-         *  на другую страницу и включить менеджер куки (чтобы не терялись сессионные
-         *  атрибуты: в данном случае без менеджера потеряется флеш-сообщение об успешном
-         *  или неудачном добавлении страницы), либо обрабатывать переход вручную.
-         * */
-        var config = new TestConfig(false, true, httpClient);
+        var config = new TestConfig(false, true, getRedirectableHttpClient());
 
         JavalinTest.test(
                 app,
@@ -411,5 +476,16 @@ public class AppTest {
 
         urls = UrlRepository.getEntities();
         assertThat(urls.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testCorretDisplay() {
+        int limit = 10;
+        String testString = "0123456789abcdef";
+        String expectedString = "0123456...";
+
+        assertThat(CorrectDisplay.apply(testString)).isEqualTo(testString);
+        assertThat(CorrectDisplay.apply(null)).isEqualTo("");
+        assertThat(CorrectDisplay.apply(testString, 10)).isEqualTo(expectedString);
     }
 }
