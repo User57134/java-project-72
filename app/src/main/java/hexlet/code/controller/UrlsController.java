@@ -181,6 +181,11 @@ public class UrlsController {
     private static UrlCheck check(Url url) {
         try {
             var response = Unirest.get(url.getName()).asString();
+
+            if (response.getStatus() >= HttpStatus.BAD_REQUEST.getCode()) {
+                return null;
+            }
+
             var body = response.getBody();
 
             var tagValues = parseHtml(body);

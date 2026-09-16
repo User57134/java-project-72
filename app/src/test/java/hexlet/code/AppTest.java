@@ -10,6 +10,7 @@ import hexlet.code.repository.UrlRepository;
 import hexlet.code.util.CorrectDisplay;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.Javalin;
+import io.javalin.http.HttpStatus;
 import io.javalin.testtools.JavalinTest;
 import io.javalin.testtools.TestConfig;
 import java.io.IOException;
@@ -77,18 +78,21 @@ public class AppTest {
                 app,
                 (server, client) -> {
                     var response = client.get("/");
-                    assertThat(response.code()).isEqualTo(200);
+                    assertThat(response.code()).isEqualTo(HttpStatus.OK.getCode());
                     assertThat(response.body().string().contains("Анализатор страниц")).isTrue();
                 });
     }
 
     @Test
-    public void testChekForValidUrl() throws IOException {
+    public void testCheckForValidUrl() throws IOException {
         try (var mws = new MockWebServer()) {
-            var testHtml = readFixture("test.html");
+            var successHtml = readFixture("success.html");
 
-            // Установили содержимое ответа
-            mws.enqueue(new MockResponse().setResponseCode(200).setBody(testHtml));
+            // Установили содержимое ответаsuccess.html
+            mws.enqueue(
+                    new MockResponse()
+                            .setResponseCode(HttpStatus.OK.getCode())
+                            .setBody(successHtml));
 
             // Запустили сервер
             mws.start();
@@ -111,7 +115,7 @@ public class AppTest {
                         // Отправка обработчику Javalin запроса с адресом testUrl для проверки и
                         // сохранение результатов в базу
                         var response = client.post(NamedRoutes.urlCheckPath(testUrl.getId()));
-                        assertThat(response.code()).isEqualTo(200);
+                        assertThat(response.code()).isEqualTo(HttpStatus.OK.getCode());
                         assertThat(response.body().string().contains("Страница успешно проверена"))
                                 .isTrue();
 
@@ -119,14 +123,53 @@ public class AppTest {
                         var lastCheck = CheckRepository.getLastCheckForUrl(testUrl.getId());
                         assertThat(lastCheck).isNotNull();
 
-                        // Сверяем данные результатов проверки с testHtml
-                        var tagValues = UrlsController.parseHtml(testHtml);
+                        // Сверяем данные результатов проверки с successHtml
+                        var tagValues = UrlsController.parseHtml(successHtml);
 
                         assertThat(lastCheck.getUrlId().equals(testUrl.getId())).isTrue();
                         assertThat(lastCheck.getTitle().equals(tagValues.get("title"))).isTrue();
                         assertThat(lastCheck.getH1().equals(tagValues.get("h1"))).isTrue();
                         assertThat(lastCheck.getDescription().equals(tagValues.get("description")))
                                 .isTrue();
+                    });
+        }
+    }
+
+    @Test
+    public void testCheckForNotFoundUrl() throws IOException {
+        try (var mws = new MockWebServer()) {
+            var testHtml = readFixture("not_found.html");
+
+            // Установили содержимое ответа
+            mws.enqueue(
+                    new MockResponse()
+                            .setResponseCode(HttpStatus.NOT_FOUND.getCode())
+                            .setBody(testHtml));
+
+            // Запустили сервер
+            mws.start();
+
+            // Подготовка тестового url
+            Url testUrl = new Url(mws.url("/").toString());
+
+            // Сохранение в базу
+            UrlRepository.save(testUrl);
+
+            // Убеждаемся, что проверок для testUrl еще не было
+            assertThat(CheckRepository.getLastCheckForUrl(testUrl.getId())).isNull();
+
+            var config = new TestConfig(false, true, getRedirectableHttpClient());
+
+            JavalinTest.test(
+                    app,
+                    config,
+                    (server, client) -> {
+                        // Отправка обработчику Javalin запроса с адресом testUrl для проверки и
+                        // сохранение результатов в базу
+                        var response = client.post(NamedRoutes.urlCheckPath(testUrl.getId()));
+                        var body = response.getBody().string();
+                        assertThat(response.code()).isEqualTo(HttpStatus.OK.getCode());
+                        assertThat(body.contains("Произошла ошибка при проверке")).isTrue();
                     });
         }
     }
@@ -154,7 +197,7 @@ public class AppTest {
                     // Отправка обработчику Javalin запроса с адресом testUrl для проверки и
                     // сохранение результатов в базу
                     var response = client.post(NamedRoutes.urlCheckPath(testUrl.getId()));
-                    assertThat(response.code()).isEqualTo(200);
+                    assertThat(response.code()).isEqualTo(HttpStatus.OK.getCode());
 
                     var body = response.getBody().string();
                     assertThat(body.contains("Произошла ошибка при проверке")).isTrue();
