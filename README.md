@@ -3,13 +3,36 @@
 [![hexlet-check](https://github.com/User57134/java-project-72/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/User57134/java-project-72/actions)
 [![Analyze](https://github.com/User57134/java-project-72/actions/workflows/analyze.yml/badge.svg)](https://github.com/User57134/java-project-72/actions/workflows/analyze.yml)
 
-Создадите полноценное веб-приложение, которое выполняет запросы по сети и сохраняет данные в базу данных. Настроите CI и выполните деплой.
+Веб-приложение для анализа страниц на SEO-пригодность. Позволяет запускать проверки сайтов анализируя коды ответа, заголовоки title (\<title>), теги h1(\<h1>) и meta-описание (\<meta name="description">).
 
-Деплой проекта: https://java-project-72-51b4.onrender.com/
 
-## Стек
+Демо: https://java-project-72-51b4.onrender.com/
 
-- Java
+
+## Функциональность
+
+- Добавление URL для анализа
+- Проверка HTTP статуса
+- Анализ тегов: title, h1, description
+- Сохранение истории проверок для каждого URL
+- Просмотр всех добавленных URL
+
+
+## Используемые технологии
+
+| Назначение | Технология |
+|----------|-------------|
+| **Язык программирования** | Java 21 |
+| **Web фреймворк** | Javalin 7 |
+| **Шаблонизатор** | JTE |
+| **Базы данных** | H2, PostgreSQL |
+| **Пул JDBC-соединений** | HikariCP |
+| **Библиотека для отправки запросов HTTP** | Unirest |
+| **Библиотека для разбора HTML** | Jsoup |
+| **Система сборки** | Gradle |
+| **CI/CD** | GitHub Actions |
+| **Тесты** | JUnit 5, MockWebServer |
+
 
 ## Установка
 
@@ -20,15 +43,12 @@ git clone https://github.com/User57134/java-project-72.git
 cd java-project-72
 ```
 
+
 ## Использование
 
 <!-- Добавьте примеры запуска и запись asciinema — именно это смотрит работодатель -->
 
----
-
-<details>
-<summary>Автоматические тесты Хекслета</summary>
-
-Тесты запускаются на каждый коммит. За запуск отвечает файл `.github/workflows/hexlet-check.yml` — не удаляйте и не переименовывайте ни его, ни репозиторий.
-
-</details>
+```bash
+make setup
+make start
+```
