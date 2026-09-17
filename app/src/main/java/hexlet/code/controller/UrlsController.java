@@ -42,20 +42,7 @@ public class UrlsController {
 
     // Обработчик запроса на отображение главной страницы (формы добавления сайта)
     public static void build(Context ctx) {
-        String flashMessage = ctx.consumeSessionAttribute("flash");
-
-        UrlAddingResult result = new UrlAddingResult();
-        if (flashMessage != null) {
-            Boolean status = ctx.consumeSessionAttribute("status");
-            if (status != null) {
-                result.setFlash(new Flash(flashMessage, status));
-            }
-
-            String input = ctx.consumeSessionAttribute("input");
-            result.setInput(input);
-        }
-
-        ctx.render("index.jte", Map.of("result", result));
+        ctx.render("index.jte");
     }
 
     // Обработчик запроса на отображение сводной страницы со списком сайтов
@@ -145,13 +132,13 @@ public class UrlsController {
             ctx.redirect(NamedRoutes.urlPath(id));
 
         } else {
-            ctx.sessionAttribute("flash", "Некорректный URL");
-            ctx.sessionAttribute("status", Boolean.FALSE);
-            ctx.sessionAttribute("input", site);
-
             ctx.status(HttpStatus.UNPROCESSABLE_CONTENT);
 
-            ctx.redirect(NamedRoutes.root());
+            UrlAddingResult result = new UrlAddingResult();
+            result.setInput(site);
+            result.setFlash(new Flash("Некорректный URL", false));
+
+            ctx.render("index.jte", Map.of("resultPage", result));
         }
     }
 

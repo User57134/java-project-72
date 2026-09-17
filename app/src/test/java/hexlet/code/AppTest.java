@@ -294,7 +294,7 @@ public class AppTest {
                     String requestBody = "url=" + baseUrl;
 
                     var response = client.post(NamedRoutes.urlsPath(), requestBody);
-                    assertThat(response.code()).isEqualTo(200);
+                    assertThat(response.code()).isEqualTo(HttpStatus.OK.getCode());
 
                     String body = response.body().string();
                     assertThat(body.contains("Сайт")).isTrue();
@@ -307,7 +307,7 @@ public class AppTest {
                     response = client.post(NamedRoutes.urlsPath(), requestBody);
 
                     body = response.body().string();
-                    assertThat(response.code()).isEqualTo(200);
+                    assertThat(response.code()).isEqualTo(HttpStatus.OK.getCode());
                     assertThat(body.contains("Сайт")).isTrue();
                     assertThat(body.contains("Страница уже существует")).isTrue();
                     assertThat(body.contains(extendexUrl)).isFalse();
@@ -320,7 +320,7 @@ public class AppTest {
                     response = client.post(NamedRoutes.urlsPath(), requestBody);
 
                     body = response.body().string();
-                    assertThat(response.code()).isEqualTo(200);
+                    assertThat(response.code()).isEqualTo(HttpStatus.OK.getCode());
                     assertThat(body.contains("Сайт")).isTrue();
                     assertThat(body.contains("Страница успешно добавлена")).isTrue();
                     assertThat(body.contains(baseUrlWithPort)).isTrue();
@@ -330,7 +330,7 @@ public class AppTest {
                     requestBody = "url=" + extendexUrl;
                     response = client.post(NamedRoutes.urlsPath(), requestBody);
                     body = response.body().string();
-                    assertThat(response.code()).isEqualTo(200);
+                    assertThat(response.code()).isEqualTo(HttpStatus.OK.getCode());
                     assertThat(body.contains("Сайт")).isTrue();
                     assertThat(body.contains("Страница уже существует")).isTrue();
                     assertThat(body.contains(extendexUrl)).isFalse();
@@ -342,7 +342,8 @@ public class AppTest {
                     requestBody = "url=" + extendexUrl;
                     response = client.post(NamedRoutes.urlsPath(), requestBody);
                     body = response.body().string();
-                    assertThat(response.code()).isEqualTo(200);
+                    assertThat(response.code())
+                            .isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.getCode());
                     assertThat(response.body().string().contains("Анализатор страниц")).isTrue();
                     assertThat(body.contains("Некорректный URL")).isTrue();
                 });
