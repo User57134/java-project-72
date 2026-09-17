@@ -40,7 +40,8 @@
 
 ```bash
 git clone https://github.com/User57134/java-project-72.git
-cd java-project-72
+cd java-project-72/app
+make setup
 ```
 
 
@@ -49,6 +50,5 @@ cd java-project-72
 <!-- Добавьте примеры запуска и запись asciinema — именно это смотрит работодатель -->
 
 ```bash
-make setup
 make start
 ```
