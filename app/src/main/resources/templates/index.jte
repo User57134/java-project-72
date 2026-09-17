@@ -7,12 +7,20 @@ content = @`
 <%-- Содержимое страницы --%>
     @if (result.getFlash() != null)
         @if (!result.getFlash().isSuccessed())
-            <div class="bg-red-200">
-                <h6 class="text-taupe-800">${result.getFlash().getMessage()}</h6>
+            <div class="max-w-7xl mx-auto mb-4 px-4" role="alert">
+                <div class="bg-red-100 border border-red-200 text-red-900 px-4 py-3 rounded-xl shadow-sm flex items-center gap-2">
+                    <h6 class="font-medium text-sm sm:text-base">
+                        ${result.getFlash().getMessage()}
+                    </h6>
+                </div>
             </div>
         @else
-            <div class="bg-green-200">
-                <h6>${result.getFlash().getMessage()}</h6>
+            <div class="max-w-7xl mx-auto mb-4 px-4" role="alert">
+                <div class="bg-green-100 border border-green-200 text-green-800 px-4 py-3 rounded-xl shadow-sm flex items-center gap-2">
+                    <h6 class="font-medium text-sm sm:text-base">
+                        ${result.getFlash().getMessage()}
+                    </h6>
+                </div>
             </div>
         @endif
     @endif
