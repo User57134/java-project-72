@@ -23,7 +23,7 @@
 <body class="min-h-screen flex flex-col justify-between">
     <nav class="bg-slate-900 border-b border-slate-800 px-10 py-4">
         <ul class="max-w-7xl mx-auto flex flex-row justify-between items-center text-sm font-medium">
-            <li><a href="/" class="text-white hover:text-indigo-400 transition-colors duration-200 py-2">Главная</a></li>
+            <li><a href="/" class="text-white hover:text-indigo-400 transition-colors duration-200 py-2">Анализатор страниц</a></li>
             <li><a href="/urls" class="text-slate-400 hover:text-white transition-colors duration-200 py-2">Сайты</a></li>
         </ul>
     </nav>
