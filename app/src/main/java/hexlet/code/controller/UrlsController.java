@@ -70,6 +70,14 @@ public class UrlsController {
             checks.put(id, lastCheck);
         }
 
+        urls.sort(
+                Comparator.comparing(
+                        url -> {
+                            var check = checks.get(url.getId());
+                            return (check != null) ? check.getCreatedAt() : null;
+                        },
+                        Comparator.nullsLast(Comparator.reverseOrder())));
+
         var page = new UrlsPage(urls, checks);
         ctx.render("urls/index.jte", Map.of("page", page));
     }
