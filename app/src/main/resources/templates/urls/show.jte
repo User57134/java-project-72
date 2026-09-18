@@ -1,33 +1,16 @@
+@import hexlet.code.dto.Flash
 @import hexlet.code.util.SystemDateTime
 @import hexlet.code.util.CorrectDisplay
 @import hexlet.code.dto.urls.UrlPage
 
 @param UrlPage page
+@param Flash flash
 
 @template.layout.page(
+flash = flash,
 content = @`
 <%-- Содержимое страницы --%>
-    @if (page.getFlash() != null)
-        @if (!page.getFlash().isSuccessed())
-            <div class="max-w-7xl mx-auto mb-4 px-4" role="alert">
-                <div class="bg-red-100 border border-red-200 text-red-900 px-4 py-3 rounded-xl shadow-sm flex items-center gap-2">
-                    <h6 class="font-medium text-sm sm:text-base">
-                        ${page.getFlash().getMessage()}
-                    </h6>
-                </div>
-            </div>
-        @else
-            <div class="max-w-7xl mx-auto mb-4 px-4" role="alert">
-                <div class="bg-green-100 border border-green-200 text-green-800 px-4 py-3 rounded-xl shadow-sm flex items-center gap-2">
-                    <h6 class="font-medium text-sm sm:text-base">
-                        ${page.getFlash().getMessage()}
-                    </h6>
-                </div>
-            </div>
-        @endif
-    @endif
-
-    <div class="mx-auto max-w-5xl rounded-lg border border-gray-200 bg-gray-50 p-10">
+        <div class="mx-auto max-w-5xl rounded-lg border border-gray-200 bg-gray-50 p-10">
         <section>
             <h1 class="text-3xl font-serif font-bold text-slate-800 tracking-tight mb-4">
                 Сайт: <span class="font-medium text-blue-900">${page.getUrl().getName()}</span>

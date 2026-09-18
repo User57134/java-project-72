@@ -1,10 +1,13 @@
+@import hexlet.code.dto.Flash
 @import hexlet.code.util.SystemDateTime
 @import hexlet.code.dto.urls.UrlsPage
 
 
 @param UrlsPage page
+@param Flash flash
 
 @template.layout.page(
+flash = flash,
 content = @`
 <%-- Содержимое страницы --%>
     <div class="mx-auto max-w-5xl rounded-lg border border-gray-200 bg-gray-50 p-10">

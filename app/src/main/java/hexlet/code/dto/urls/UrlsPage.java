@@ -32,10 +32,6 @@ public class UrlsPage {
     }
 
     public UrlCheck getLastCheckForUrl(long urlId) {
-        if (checks.containsKey(urlId)) {
-            return checks.get(urlId);
-        } else {
-            return null;
-        }
+        return checks.getOrDefault(urlId, null);
     }
 }

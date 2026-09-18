@@ -1,6 +1,6 @@
 package hexlet.code.controller;
 
-import hexlet.code.dto.urls.UrlAddingResult;
+import hexlet.code.dto.Flash;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
 import hexlet.code.model.Url;
@@ -8,7 +8,6 @@ import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.CheckRepository;
 import hexlet.code.repository.UrlRepository;
 import hexlet.code.util.ErrorReport;
-import hexlet.code.util.Flash;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -63,21 +62,20 @@ public class UrlsController {
             if (url.isPresent()) {
                 var page = new UrlPage(url.get());
 
+                Flash flash = new Flash();
                 String flashMessage = ctx.consumeSessionAttribute("flash");
                 if (flashMessage != null) {
-                    Boolean status = ctx.consumeSessionAttribute("status");
+                    Integer status = ctx.consumeSessionAttribute("status");
 
                     if (status != null) {
-                        page.setFlash(new Flash(flashMessage, status));
+                        flash.setFlash(flashMessage, status);
                     }
                 }
 
                 var checks = CheckRepository.getAllChecksForUrl(id);
-                if (!checks.isEmpty()) {
-                    page.setChecks(checks);
-                }
+                page.setChecks(checks);
 
-                ctx.render("urls/show.jte", Map.of("page", page));
+                ctx.render("urls/show.jte", Map.of("page", page, "flash", flash));
                 return;
             }
         }
@@ -103,12 +101,10 @@ public class UrlsController {
                 }
 
                 ctx.sessionAttribute("flash", "Страница успешно добавлена");
-                ctx.sessionAttribute("status", Boolean.TRUE);
-                ctx.sessionAttribute("input", "");
+                ctx.sessionAttribute("status", 1);
             } else {
                 ctx.sessionAttribute("flash", "Страница уже существует");
-                ctx.sessionAttribute("status", Boolean.FALSE);
-                ctx.sessionAttribute("input", "");
+                ctx.sessionAttribute("status", -1);
             }
 
             ctx.redirect(NamedRoutes.urlPath(id));
@@ -116,11 +112,8 @@ public class UrlsController {
         } else {
             ctx.status(HttpStatus.UNPROCESSABLE_CONTENT);
 
-            UrlAddingResult result = new UrlAddingResult();
-            result.setInput(site);
-            result.setFlash(new Flash("Некорректный URL", false));
-
-            ctx.render("index.jte", Map.of("resultPage", result));
+            ctx.render(
+                    "index.jte", Map.of("input", site, "flash", new Flash("Некорректный URL", -1)));
         }
     }
 
@@ -197,13 +190,13 @@ public class UrlsController {
                     }
 
                     ctx.sessionAttribute("flash", "Страница успешно проверена");
-                    ctx.sessionAttribute("status", Boolean.TRUE);
+                    ctx.sessionAttribute("status", 1);
 
                 } else {
                     log.info("UrsController::createCheck(null)");
 
                     ctx.sessionAttribute("flash", "Произошла ошибка при проверке");
-                    ctx.sessionAttribute("status", Boolean.FALSE);
+                    ctx.sessionAttribute("status", -1);
                 }
 
                 ctx.redirect(NamedRoutes.urlPath(id));

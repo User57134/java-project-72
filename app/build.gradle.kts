@@ -95,6 +95,9 @@ dependencies {
 
 
 tasks.test {
+
+    // enabled = false
+
     useJUnitPlatform()
 
     testLogging {
