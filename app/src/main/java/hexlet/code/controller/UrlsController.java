@@ -130,22 +130,18 @@ public class UrlsController {
         String h1 = null;
         String description = null;
 
-        try {
-            var doc = Jsoup.parse(body);
+        var doc = Jsoup.parse(body);
 
-            title = doc.title();
+        title = doc.title();
 
-            var h1Tag = doc.selectFirst("h1");
-            if (h1Tag != null) {
-                h1 = h1Tag.text();
-            }
+        var h1Tag = doc.selectFirst("h1");
+        if (h1Tag != null) {
+            h1 = h1Tag.text();
+        }
 
-            var metaDescription = doc.selectFirst("meta[name=description]");
-            if (metaDescription != null) {
-                description = metaDescription.attr("content");
-            }
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
+        var metaDescription = doc.selectFirst("meta[name=description]");
+        if (metaDescription != null) {
+            description = metaDescription.attr("content");
         }
 
         result.put("title", title);
