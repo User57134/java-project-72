@@ -5,10 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -77,36 +74,6 @@ public class CheckRepository extends BaseRepository {
         }
 
         return urlChecks;
-    }
-
-    public static UrlCheck getLastCheckForUrl(long urlId) {
-        String sql = "SELECT * FROM url_checks WHERE url_id = ? ORDER BY created_at DESC LIMIT 1";
-
-        try (var connection = dataSource.getConnection()) {
-            var preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setLong(1, urlId);
-
-            var resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                var id = resultSet.getLong(1);
-                var uid = resultSet.getLong("url_id");
-                var statusCode = resultSet.getInt("status_code");
-                var h1 = resultSet.getString("h1");
-                var title = resultSet.getString("title");
-                var description = resultSet.getString("description");
-                var createdAt = resultSet.getTimestamp("created_at").toInstant();
-
-                var urlCheck = new UrlCheck(id, statusCode, title, h1, description, uid, createdAt);
-
-                return urlCheck;
-            }
-
-        } catch (SQLException ex) {
-            log.error("CheckRepository::getLastCheckForUrl() error: {}", ex.getMessage());
-        }
-
-        return null;
     }
 
     public static long save(UrlCheck check) {

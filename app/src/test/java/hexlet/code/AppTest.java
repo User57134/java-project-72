@@ -2,12 +2,12 @@ package hexlet.code;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import hexlet.code.controller.UrlsController;
 import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.CheckRepository;
 import hexlet.code.repository.UrlRepository;
 import hexlet.code.util.CorrectDisplay;
+import hexlet.code.util.HtmlParser;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.Javalin;
 import io.javalin.http.HttpStatus;
@@ -104,7 +104,7 @@ public class AppTest {
             UrlRepository.save(testUrl);
 
             // Убеждаемся, что проверок для testUrl еще не было
-            assertThat(CheckRepository.getLastCheckForUrl(testUrl.getId())).isNull();
+            assertThat(CheckRepository.getAllChecksForUrl(testUrl.getId()).size()).isEqualTo(0);
 
             var config = new TestConfig(false, true, getRedirectableHttpClient());
 
@@ -120,16 +120,16 @@ public class AppTest {
                                 .isTrue();
 
                         // Убеждаемся, что для testUrl теперь есть проверка
-                        var lastCheck = CheckRepository.getLastCheckForUrl(testUrl.getId());
-                        assertThat(lastCheck).isNotNull();
+                        var check = CheckRepository.getLatestChecksByUrl().get(testUrl.getId());
+                        assertThat(check).isNotNull();
 
                         // Сверяем данные результатов проверки с successHtml
-                        var tagValues = UrlsController.parseHtml(successHtml);
+                        var tagValues = HtmlParser.parse(successHtml);
 
-                        assertThat(lastCheck.getUrlId().equals(testUrl.getId())).isTrue();
-                        assertThat(lastCheck.getTitle().equals(tagValues.get("title"))).isTrue();
-                        assertThat(lastCheck.getH1().equals(tagValues.get("h1"))).isTrue();
-                        assertThat(lastCheck.getDescription().equals(tagValues.get("description")))
+                        assertThat(check.getUrlId().equals(testUrl.getId())).isTrue();
+                        assertThat(check.getTitle().equals(tagValues.get("title"))).isTrue();
+                        assertThat(check.getH1().equals(tagValues.get("h1"))).isTrue();
+                        assertThat(check.getDescription().equals(tagValues.get("description")))
                                 .isTrue();
                     });
         }
@@ -156,7 +156,7 @@ public class AppTest {
             UrlRepository.save(testUrl);
 
             // Убеждаемся, что проверок для testUrl еще не было
-            assertThat(CheckRepository.getLastCheckForUrl(testUrl.getId())).isNull();
+            assertThat(CheckRepository.getAllChecksForUrl(testUrl.getId()).size()).isEqualTo(0);
 
             var config = new TestConfig(false, true, getRedirectableHttpClient());
 
@@ -259,17 +259,17 @@ public class AppTest {
                     assertThat(checks.size()).isEqualTo(3);
 
                     // Проверить правильность времени последней проверки для url#1
-                    var result = CheckRepository.getLastCheckForUrl(testUrl1.getId());
+                    var result = allChecks.get(testUrl1.getId());
                     assertThat(result != null).isTrue();
 
-                    var lastCheck = checks.getFirst().getCreatedAt();
+                    var lastCheckTime = checks.getFirst().getCreatedAt();
                     for (var check : checks) {
-                        if (check.getCreatedAt().isAfter(lastCheck)) {
-                            lastCheck = check.getCreatedAt();
+                        if (check.getCreatedAt().isAfter(lastCheckTime)) {
+                            lastCheckTime = check.getCreatedAt();
                         }
                     }
 
-                    assertThat(result.getCreatedAt().equals(lastCheck)).isTrue();
+                    assertThat(result.getCreatedAt().equals(lastCheckTime)).isTrue();
                 });
     }
 

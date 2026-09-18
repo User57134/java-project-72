@@ -1,5 +1,5 @@
 @import hexlet.code.dto.Flash
-@import hexlet.code.util.SystemDateTime
+@import hexlet.code.util.Formatter
 @import hexlet.code.dto.urls.UrlsPage
 
 
@@ -28,7 +28,7 @@ content = @`
                         <td class="border border-gray-300 px-4 py-2">${url.getId()}</td>
                         <td class="border border-gray-300 px-4 py-2"><a href="/urls/${url.getId()}" class="text-amber-950 hover:text-amber-600 transition-colors duration-200 font-medium">${url.getName()}</a></td>
                         @if (page.getLastCheckForUrl(url.getId()) != null)
-                            <td class="border border-gray-300 px-4 py-2">${SystemDateTime.format(page.getLastCheckForUrl(url.getId()).getCreatedAt())}</td>
+                            <td class="border border-gray-300 px-4 py-2">${Formatter.makeTimestampAsString(page.getLastCheckForUrl(url.getId()).getCreatedAt())}</td>
                             <td class="border border-gray-300 px-4 py-2">${page.getLastCheckForUrl(url.getId()).getStatusCode()}</td>
                         @else
                             <td class="border border-gray-300 px-4 py-2"></td>

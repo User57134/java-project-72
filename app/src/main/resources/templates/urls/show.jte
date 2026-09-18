@@ -1,5 +1,5 @@
 @import hexlet.code.dto.Flash
-@import hexlet.code.util.SystemDateTime
+@import hexlet.code.util.Formatter
 @import hexlet.code.util.CorrectDisplay
 @import hexlet.code.dto.urls.UrlPage
 
@@ -28,7 +28,7 @@ content = @`
                 </tr>
                 <tr>
                     <td class="border border-gray-300 px-4 py-2 font-bold">Дата создания</td>
-                    <td class="border border-gray-300 px-4 py-2">${SystemDateTime.format(page.getUrl().getCreatedAt())}</td>
+                    <td class="border border-gray-300 px-4 py-2">${Formatter.makeTimestampAsString(page.getUrl().getCreatedAt())}</td>
                 </tr>
                 </tbody>
             </table>
@@ -63,7 +63,7 @@ content = @`
                             <td class="border border-gray-300 px-4 py-2">${CorrectDisplay.apply(check.getH1())}</td>
                             <td class="border border-gray-300 px-4 py-2">${CorrectDisplay.apply(check.getTitle())}</td>
                             <td class="border border-gray-300 px-4 py-2">${CorrectDisplay.apply(check.getDescription())}</td>
-                            <td class="border border-gray-300 px-4 py-2">${SystemDateTime.format(check.getCreatedAt())}</td>
+                            <td class="border border-gray-300 px-4 py-2">${Formatter.makeTimestampAsString(check.getCreatedAt())}</td>
                         </tr>
                     @endfor
                     </tbody>

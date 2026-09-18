@@ -6,23 +6,34 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 public final class Flash {
+    public static final int SUCCESS = 1;
+    public static final int FAIL = -1;
+    public static final int NOT_READY = -1;
+
     private String message;
     private int status;
 
     public void setFlash(String flashMessage, int statusCode) {
         message = flashMessage;
-        status = statusCode;
+
+        if (statusCode > 0) {
+            status = SUCCESS;
+        } else if (statusCode < 0) {
+            status = FAIL;
+        } else {
+            status = NOT_READY;
+        }
     }
 
     public boolean isSucceeded() {
-        return (status > 0);
+        return (status == SUCCESS);
     }
 
     public boolean isFail() {
-        return (status < 0);
+        return (status == FAIL);
     }
 
     public boolean isActive() {
-        return (status != 0);
+        return (status != NOT_READY);
     }
 }
