@@ -5,16 +5,20 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class CheckRepository extends BaseRepository {
-    public static List<UrlCheck> getEntities() {
-        List<UrlCheck> urlChecks = new LinkedList<>();
 
-        String sql = "SELECT * FROM url_checks";
+    public static Map<Long, UrlCheck> getLatestChecksByUrl() {
+        Map<Long, UrlCheck> lastChecks = new HashMap<>();
+
+        String sql =
+                "SELECT DISTINCT ON (url_id) * FROM url_checks ORDER BY url_id, created_at DESC";
 
         try (var connection = dataSource.getConnection()) {
             var statement = connection.createStatement();
@@ -22,7 +26,7 @@ public class CheckRepository extends BaseRepository {
             var resultSet = statement.executeQuery(sql);
 
             while (resultSet.next()) {
-                var id = resultSet.getLong(1);
+                var id = resultSet.getLong("id");
                 var urlId = resultSet.getLong("url_id");
                 var statusCode = resultSet.getInt("status_code");
                 var h1 = resultSet.getString("h1");
@@ -33,20 +37,20 @@ public class CheckRepository extends BaseRepository {
                 var urlCheck =
                         new UrlCheck(id, statusCode, title, h1, description, urlId, createdAt);
 
-                urlChecks.add(urlCheck);
+                lastChecks.put(urlId, urlCheck);
             }
 
         } catch (SQLException ex) {
             log.error("CheckRepository::getEntities() error: {}", ex.getMessage());
         }
 
-        return urlChecks;
+        return lastChecks;
     }
 
     public static List<UrlCheck> getAllChecksForUrl(long urlId) {
         List<UrlCheck> urlChecks = new LinkedList<>();
 
-        String sql = "SELECT * FROM url_checks WHERE url_id = ?";
+        String sql = "SELECT * FROM url_checks WHERE url_id = ? ORDER BY created_at DESC";
 
         try (var connection = dataSource.getConnection()) {
             var preparedStatement = connection.prepareStatement(sql);

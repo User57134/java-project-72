@@ -250,9 +250,9 @@ public class AppTest {
                 config,
                 (server, client) -> {
 
-                    // Проверить, что всего проверок 4
-                    List<UrlCheck> allChecks = CheckRepository.getEntities();
-                    assertThat(allChecks.size()).isEqualTo(4);
+                    // Проверить, что всего записей 2
+                    var allChecks = CheckRepository.getLatestChecksByUrl();
+                    assertThat(allChecks.size()).isEqualTo(2);
 
                     // Проверить, что для url#1 проверок 3
                     List<UrlCheck> checks = CheckRepository.getAllChecksForUrl(testUrl1.getId());

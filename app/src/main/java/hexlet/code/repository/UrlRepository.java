@@ -13,10 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UrlRepository extends BaseRepository {
 
-    public static List<Url> getEntities() {
+    private static List<Url> getEntitiesInDescendingOrder() {
         List<Url> urls = new LinkedList<>();
 
-        String sql = "SELECT * FROM urls";
+        String sql = "SELECT * FROM urls ORDER BY urls.created_at DESC";
 
         try (var connection = dataSource.getConnection()) {
             var statement = connection.createStatement();
@@ -37,6 +37,10 @@ public class UrlRepository extends BaseRepository {
         }
 
         return urls;
+    }
+
+    public static List<Url> getEntities() {
+        return getEntitiesInDescendingOrder();
     }
 
     public static long save(Url url) {

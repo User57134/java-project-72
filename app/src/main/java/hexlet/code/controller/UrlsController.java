@@ -1,6 +1,5 @@
 package hexlet.code.controller;
 
-import hexlet.code.App;
 import hexlet.code.dto.urls.UrlAddingResult;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
@@ -17,14 +16,12 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import kong.unirest.Unirest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Jsoup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class UrlsController {
-
-    private static final Logger log = LoggerFactory.getLogger(App.class);
 
     private static URL parseUrl(String site) {
         try {
@@ -49,21 +46,7 @@ public class UrlsController {
     public static void showAll(Context ctx) {
         var urls = UrlRepository.getEntities();
 
-        Map<Long, UrlCheck> checks = new HashMap<>();
-        for (var url : urls) {
-            var id = url.getId();
-
-            var lastCheck = CheckRepository.getLastCheckForUrl(id);
-            checks.put(id, lastCheck);
-        }
-
-        urls.sort(
-                Comparator.comparing(
-                        url -> {
-                            var check = checks.get(url.getId());
-                            return (check != null) ? check.getCreatedAt() : null;
-                        },
-                        Comparator.nullsLast(Comparator.reverseOrder())));
+        var checks = CheckRepository.getLatestChecksByUrl();
 
         var page = new UrlsPage(urls, checks);
         ctx.render("urls/index.jte", Map.of("page", page));
@@ -89,7 +72,6 @@ public class UrlsController {
                     }
                 }
 
-                var all = CheckRepository.getEntities();
                 var checks = CheckRepository.getAllChecksForUrl(id);
                 if (!checks.isEmpty()) {
                     page.setChecks(checks);
