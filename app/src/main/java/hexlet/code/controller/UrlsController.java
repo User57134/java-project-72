@@ -12,6 +12,7 @@ import hexlet.code.util.HtmlParser;
 import hexlet.code.util.NamedRoutes;
 import hexlet.code.util.UrlValidationException;
 import io.javalin.http.*;
+import java.sql.SQLException;
 import java.util.*;
 import kong.unirest.Unirest;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ public class UrlsController {
     }
 
     // Обработчик запроса на отображение страницы для сайта
-    public static void show(Context ctx) {
+    public static void show(Context ctx) throws SQLException {
         Long id =
                 ctx.pathParamAsClass("id", Long.class)
                         .required()
@@ -71,23 +72,22 @@ public class UrlsController {
     }
 
     // Обработчик запроса на добавление сайта
-    public static void create(Context ctx) {
+    public static void create(Context ctx) throws SQLException {
         String site = ctx.formParam("url");
 
         var url = Formatter.getBaseUrl(site).orElseThrow(() -> new UrlValidationException(site));
 
-        var id = UrlRepository.search(url.toString());
+        var result = UrlRepository.search(url.toString());
 
-        if (id == 0L) {
+        long id = 0;
+        if (result.isEmpty()) {
             id = UrlRepository.save(new Url(url.toString()));
-
-            if (id == 0L) {
-                throw new InternalServerErrorResponse("Ошибка при регистрации сайта.");
-            }
 
             ctx.sessionAttribute("flash", "Страница успешно добавлена");
             ctx.sessionAttribute("status", Flash.SUCCESS);
         } else {
+            id = result.get().getId();
+
             ctx.sessionAttribute("flash", "Страница уже существует");
             ctx.sessionAttribute("status", Flash.FAIL);
         }
@@ -96,7 +96,7 @@ public class UrlsController {
     }
 
     // Обработчик запроса на добавление сайта
-    public static void createCheck(Context ctx) {
+    public static void createCheck(Context ctx) throws SQLException {
         Long id =
                 ctx.pathParamAsClass("id", Long.class)
                         .required()
@@ -133,7 +133,7 @@ public class UrlsController {
     }
 
     // Обработчик запроса на удаление сайта
-    public static void delete(Context ctx) {
+    public static void delete(Context ctx) throws SQLException {
         Long id =
                 ctx.pathParamAsClass("id", Long.class)
                         .required()

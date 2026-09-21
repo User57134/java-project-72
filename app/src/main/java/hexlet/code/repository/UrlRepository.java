@@ -75,7 +75,7 @@ public class UrlRepository extends BaseRepository {
         }
     }
 
-    public static Optional<Url> find(Long id) {
+    public static Optional<Url> find(Long id) throws SQLException {
         String sql = "SELECT * FROM urls WHERE id = ?";
 
         try (var connection = dataSource.getConnection()) {
@@ -90,14 +90,12 @@ public class UrlRepository extends BaseRepository {
 
                 return Optional.of(new Url(id, name, createdAt));
             }
-        } catch (SQLException ex) {
-            log.error("UrlRepository::find() error: {}", ex.getMessage());
         }
 
         return Optional.empty();
     }
 
-    public static long search(String url) {
+    public static Optional<Url> search(String url) throws SQLException {
         String sql = "SELECT * FROM urls WHERE urls.name = ?";
 
         try (var connection = dataSource.getConnection()) {
@@ -107,16 +105,17 @@ public class UrlRepository extends BaseRepository {
             var resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                return resultSet.getLong("id");
+                var id = resultSet.getLong("id");
+                var createdAt = resultSet.getTimestamp("created_at").toInstant();
+
+                return Optional.of(new Url(id, url, createdAt));
             }
-        } catch (SQLException ex) {
-            log.error("UrlRepository::contains() error: {}", ex.getMessage());
         }
 
-        return 0L;
+        return Optional.empty();
     }
 
-    public static boolean delete(Long id) {
+    public static boolean delete(Long id) throws SQLException {
         var sql = "DELETE FROM urls WHERE urls.id = ?";
 
         try (var connection = dataSource.getConnection()) {
@@ -128,14 +127,12 @@ public class UrlRepository extends BaseRepository {
             if (rowsDeleted > 0) {
                 return true;
             }
-        } catch (SQLException ex) {
-            log.error("UrlRepository::delete() error: {}", ex.getMessage());
         }
 
         return false;
     }
 
-    public static int deleteAll() {
+    public static int deleteAll() throws SQLException {
         var sql = "DELETE FROM urls";
 
         try (var connection = dataSource.getConnection()) {
@@ -144,11 +141,6 @@ public class UrlRepository extends BaseRepository {
             int rowsDeleted = statement.executeUpdate(sql);
 
             return rowsDeleted;
-
-        } catch (SQLException ex) {
-            log.error("UrlRepository::deleteAll() error: {}", ex.getMessage());
         }
-
-        return 0;
     }
 }

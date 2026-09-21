@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -443,7 +444,7 @@ public class AppTest {
     }
 
     @Test
-    public void urlRepositoryTest() {
+    public void urlRepositoryTest() throws SQLException {
         Url u1 = new Url("https://site1.io");
         Url u2 = new Url("https://site2.com");
         Url u3 = new Url("https://site3.ru");
@@ -469,7 +470,7 @@ public class AppTest {
             assertThat(UrlRepository.find(url.getId()).isPresent()).isFalse();
 
             // Проверка поиска по идентификатору
-            assertThat(UrlRepository.search(url.getName())).isEqualTo(0L);
+            assertThat(UrlRepository.search(url.getName())).isEqualTo(Optional.empty());
         }
 
         for (var url : urls) {
@@ -483,7 +484,7 @@ public class AppTest {
     }
 
     @Test
-    public void urlCheckAddingTest() {
+    public void urlCheckAddingTest() throws SQLException {
         Url u1 = new Url("https://site1.io");
         Url u2 = new Url("https://site2.com");
         Url u3 = new Url("https://site3.ru");
@@ -509,7 +510,7 @@ public class AppTest {
             assertThat(UrlRepository.find(url.getId()).isPresent()).isFalse();
 
             // Проверка поиска по идентификатору
-            assertThat(UrlRepository.search(url.getName())).isEqualTo(0L);
+            assertThat(UrlRepository.search(url.getName())).isEqualTo(Optional.empty());
         }
 
         for (var url : urls) {
