@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UrlRepository extends BaseRepository {
 
-    private static List<Url> getEntitiesInDescendingOrder() {
+    private static List<Url> getEntitiesInDescendingOrder() throws SQLException {
         List<Url> urls = new LinkedList<>();
 
         String sql = "SELECT * FROM urls ORDER BY urls.created_at DESC";
@@ -31,19 +31,16 @@ public class UrlRepository extends BaseRepository {
 
                 urls.add(url);
             }
-
-        } catch (SQLException ex) {
-            log.error("UrlRepository::getEntities() error: {}", ex.getMessage());
         }
 
         return urls;
     }
 
-    public static List<Url> getEntities() {
+    public static List<Url> getEntities() throws SQLException {
         return getEntitiesInDescendingOrder();
     }
 
-    public static long save(Url url) {
+    public static long save(Url url) throws SQLException {
         String sql = "INSERT INTO urls (name, created_at) VALUES(?, ?)";
         Long id = null;
 
@@ -65,13 +62,8 @@ public class UrlRepository extends BaseRepository {
                 url.setId(id);
                 return id;
             } else {
-                log.error("DB has not returned an id after saving the url: " + url.getName());
-                return 0L;
+                throw new SQLException("DB have not returned an id after saving an entity");
             }
-
-        } catch (SQLException ex) {
-            log.error("UrlRepository::save() error: {}", ex.getMessage());
-            return 0L;
         }
     }
 

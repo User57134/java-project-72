@@ -85,7 +85,7 @@ public class AppTest {
     }
 
     @Test
-    public void testCheckForValidUrl() throws IOException {
+    public void testCheckForValidUrl() throws IOException, SQLException {
         try (var mws = new MockWebServer()) {
             var successHtml = readFixture("success.html");
 
@@ -137,7 +137,7 @@ public class AppTest {
     }
 
     @Test
-    public void testCheckForNotFoundUrl() throws IOException {
+    public void testCheckForNotFoundUrl() throws IOException, SQLException {
         try (var mws = new MockWebServer()) {
             var testHtml = readFixture("not_found.html");
 
@@ -176,7 +176,7 @@ public class AppTest {
     }
 
     @Test
-    public void testChekForInvalidUrl() throws IOException {
+    public void testChekForInvalidUrl() throws IOException, SQLException {
         /*
          * Домены .localhost и .invalid будут обрабатываться локально, поэтому
          * при попытке соединения по данному url мгновенно возникнет исключение
@@ -206,7 +206,7 @@ public class AppTest {
     }
 
     @Test
-    public void testCheckRepository() throws IOException {
+    public void testCheckRepository() throws IOException, SQLException {
         Url testUrl1 = new Url("http://test1.com");
         Long id = UrlRepository.save(testUrl1);
         assertThat(id > 0).isTrue();
@@ -351,7 +351,7 @@ public class AppTest {
     }
 
     @Test
-    public void testUrlsPage() {
+    public void testUrlsPage() throws SQLException {
         Url u1 = new Url("https://site1.io");
         Url u2 = new Url("https://site2.com");
         Url u3 = new Url("https://site3.ru");

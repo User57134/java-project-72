@@ -26,7 +26,7 @@ public class UrlsController {
     }
 
     // Обработчик запроса на отображение сводной страницы со списком сайтов
-    public static void showAll(Context ctx) {
+    public static void showAll(Context ctx) throws SQLException {
         var urls = UrlRepository.getEntities();
 
         var checks = CheckRepository.getLatestChecksByUrl();
