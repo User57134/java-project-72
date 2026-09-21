@@ -8,7 +8,7 @@ import lombok.*;
 public final class Flash {
     public static final int SUCCESS = 1;
     public static final int FAIL = -1;
-    public static final int NOT_READY = -1;
+    public static final int NOT_READY = 0;
 
     private String message;
     private int status;

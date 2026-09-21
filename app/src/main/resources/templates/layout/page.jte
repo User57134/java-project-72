@@ -31,24 +31,14 @@
     </nav>
 
     <main>
-        @if (flash != null)
-            @if (flash.isSucceeded())
-                <div class="max-w-7xl mx-auto mb-4 px-4" role="alert">
-                    <div class="bg-green-100 border border-green-200 text-green-800 px-4 py-3 rounded-xl shadow-sm flex items-center gap-2">
-                        <h6 class="font-medium text-sm sm:text-base">
-                            ${flash.getMessage()}
-                        </h6>
-                    </div>
+        @if (flash != null && flash.isActive())
+            <div class="max-w-7xl mx-auto mb-4 px-4" role="alert">
+                <div class="${flash.isSucceeded() ? "bg-green-100 border-green-200 text-green-800" : "bg-red-100 border-red-200 text-red-900"} border px-4 py-3 rounded-xl shadow-sm flex items-center gap-2">
+                    <h6 class="font-medium text-sm sm:text-base">
+                        ${flash.getMessage()}
+                    </h6>
                 </div>
-            @elseif(flash.isFail())
-                <div class="max-w-7xl mx-auto mb-4 px-4" role="alert">
-                    <div class="bg-red-100 border border-red-200 text-red-900 px-4 py-3 rounded-xl shadow-sm flex items-center gap-2">
-                        <h6 class="font-medium text-sm sm:text-base">
-                            ${flash.getMessage()}
-                        </h6>
-                    </div>
-                </div>
-            @endif
+            </div>
         @endif
 
         ${content}
