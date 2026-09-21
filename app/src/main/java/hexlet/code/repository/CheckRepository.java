@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CheckRepository extends BaseRepository {
 
-    public static Map<Long, UrlCheck> getLatestChecksByUrl() {
+    public static Map<Long, UrlCheck> getLatestChecksByUrl() throws SQLException {
         Map<Long, UrlCheck> lastChecks = new HashMap<>();
 
         String sql =
@@ -36,15 +36,12 @@ public class CheckRepository extends BaseRepository {
 
                 lastChecks.put(urlId, urlCheck);
             }
-
-        } catch (SQLException ex) {
-            log.error("CheckRepository::getEntities() error: {}", ex.getMessage());
         }
 
         return lastChecks;
     }
 
-    public static List<UrlCheck> getAllChecksForUrl(long urlId) {
+    public static List<UrlCheck> getAllChecksForUrl(long urlId) throws SQLException {
         List<UrlCheck> urlChecks = new LinkedList<>();
 
         String sql = "SELECT * FROM url_checks WHERE url_id = ? ORDER BY created_at DESC";
@@ -68,18 +65,16 @@ public class CheckRepository extends BaseRepository {
 
                 urlChecks.add(urlCheck);
             }
-
-        } catch (SQLException ex) {
-            log.error("CheckRepository::getEntities() error: {}", ex.getMessage());
         }
 
         return urlChecks;
     }
 
-    public static long save(UrlCheck check) {
+    public static long save(UrlCheck check) throws SQLException {
         String sql =
                 "INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at) VALUES(?, ?, ?, ?, ?, ?)";
-        Long id = null;
+
+        long id = 0;
 
         try (var connection = dataSource.getConnection()) {
             var preparedStatement =
@@ -104,15 +99,8 @@ public class CheckRepository extends BaseRepository {
                 check.setId(id);
                 return id;
             } else {
-                log.error(
-                        "DB has not returned an id after saving a check for the url: "
-                                + check.getUrlId());
-                return 0L;
+                throw new SQLException("DB have not returned an id after saving an entity");
             }
-
-        } catch (SQLException ex) {
-            log.error("CheckRepository::save() error: {}", ex.getMessage());
-            return 0L;
         }
     }
 }

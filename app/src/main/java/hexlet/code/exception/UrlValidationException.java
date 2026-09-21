@@ -1,4 +1,4 @@
-package hexlet.code.util;
+package hexlet.code.exception;
 
 import hexlet.code.dto.Flash;
 import lombok.Getter;

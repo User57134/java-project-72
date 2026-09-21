@@ -42,7 +42,8 @@ public class UrlRepository extends BaseRepository {
 
     public static long save(Url url) throws SQLException {
         String sql = "INSERT INTO urls (name, created_at) VALUES(?, ?)";
-        Long id = null;
+
+        long id = 0;
 
         try (var connection = dataSource.getConnection()) {
             var preparedStatement =

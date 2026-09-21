@@ -3,6 +3,7 @@ package hexlet.code.controller;
 import hexlet.code.dto.Flash;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
+import hexlet.code.exception.UrlValidationException;
 import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.CheckRepository;
@@ -10,8 +11,8 @@ import hexlet.code.repository.UrlRepository;
 import hexlet.code.util.Formatter;
 import hexlet.code.util.HtmlParser;
 import hexlet.code.util.NamedRoutes;
-import hexlet.code.util.UrlValidationException;
 import io.javalin.http.*;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 import kong.unirest.Unirest;
@@ -112,22 +113,17 @@ public class UrlsController {
                                 () ->
                                         new NotFoundResponse(
                                                 "Entity with id = " + id + " not found"));
+        try {
+            var urlCheck = check(url);
 
-        check(url)
-                .ifPresentOrElse(
-                        uc -> {
-                            if (CheckRepository.save(uc) == 0L) {
-                                throw new InternalServerErrorResponse(
-                                        "Ошибка при сохранении данных о проверке сайта.");
-                            }
+            CheckRepository.save(urlCheck);
+            ctx.sessionAttribute("flash", "Страница успешно проверена");
+            ctx.sessionAttribute("status", Flash.SUCCESS);
 
-                            ctx.sessionAttribute("flash", "Страница успешно проверена");
-                            ctx.sessionAttribute("status", Flash.SUCCESS);
-                        },
-                        () -> {
-                            ctx.sessionAttribute("flash", "Произошла ошибка при проверке");
-                            ctx.sessionAttribute("status", Flash.FAIL);
-                        });
+        } catch (Exception ex) {
+            ctx.sessionAttribute("flash", "Произошла ошибка при проверке");
+            ctx.sessionAttribute("status", Flash.FAIL);
+        }
 
         ctx.redirect(NamedRoutes.urlPath(id));
     }
@@ -150,28 +146,22 @@ public class UrlsController {
         }
     }
 
-    private static Optional<UrlCheck> check(Url url) {
-        try {
-            var response = Unirest.get(url.getName()).asString();
+    private static UrlCheck check(Url url) throws IOException {
+        var response = Unirest.get(url.getName()).asString();
 
-            if (response.getStatus() < HttpStatus.BAD_REQUEST.getCode()) {
-                var body = response.getBody();
+        if (response.getStatus() < HttpStatus.BAD_REQUEST.getCode()) {
+            var body = response.getBody();
 
-                var tagValues = HtmlParser.parse(body);
+            var tagValues = HtmlParser.parse(body);
 
-                return Optional.of(
-                        new UrlCheck(
-                                url,
-                                response.getStatus(),
-                                tagValues.get("title"),
-                                tagValues.get("h1"),
-                                tagValues.get("description")));
-            }
-
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
+            return new UrlCheck(
+                    url,
+                    response.getStatus(),
+                    tagValues.get("title"),
+                    tagValues.get("h1"),
+                    tagValues.get("description"));
+        } else {
+            throw new IOException("Processing error: " + url);
         }
-
-        return Optional.empty();
     }
 }
