@@ -7,9 +7,12 @@ import gg.jte.TemplateEngine;
 import gg.jte.resolve.DirectoryCodeResolver;
 import gg.jte.resolve.ResourceCodeResolver;
 import hexlet.code.controller.UrlsController;
+import hexlet.code.dto.Flash;
 import hexlet.code.repository.BaseRepository;
 import hexlet.code.util.NamedRoutes;
+import hexlet.code.util.UrlValidationException;
 import io.javalin.Javalin;
+import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.rendering.template.JavalinJte;
 import java.io.BufferedReader;
@@ -18,6 +21,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
@@ -120,6 +124,21 @@ public class App {
                                 config.staticFiles.add("/static", Location.CLASSPATH);
                             }
                             config.fileRenderer(new JavalinJte(createTemplateEngine()));
+
+                            // При возникновении исключения UrlValidationException открыть форму
+                            // добавления сайта
+                            config.routes.exception(
+                                    UrlValidationException.class,
+                                    (e, ctx) -> {
+                                        ctx.status(HttpStatus.UNPROCESSABLE_CONTENT);
+                                        ctx.render(
+                                                "index.jte",
+                                                Map.of(
+                                                        "input",
+                                                        e.getInput(),
+                                                        "flash",
+                                                        new Flash("Некорректный URL", Flash.FAIL)));
+                                    });
 
                             // Обработка запросов на вывод главной страницы, открывается форма
                             // добавления сайтов

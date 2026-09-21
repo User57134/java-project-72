@@ -10,6 +10,7 @@ import hexlet.code.repository.UrlRepository;
 import hexlet.code.util.Formatter;
 import hexlet.code.util.HtmlParser;
 import hexlet.code.util.NamedRoutes;
+import hexlet.code.util.UrlValidationException;
 import io.javalin.http.*;
 import java.util.*;
 import kong.unirest.Unirest;
@@ -73,35 +74,25 @@ public class UrlsController {
     public static void create(Context ctx) {
         String site = ctx.formParam("url");
 
-        var baseUrl = Formatter.getBaseUrl(site);
+        var url = Formatter.getBaseUrl(site).orElseThrow(() -> new UrlValidationException(site));
 
-        baseUrl.ifPresentOrElse(
-                url -> {
-                    var id = UrlRepository.search(url.toString());
+        var id = UrlRepository.search(url.toString());
 
-                    if (id == 0L) {
-                        id = UrlRepository.save(new Url(url.toString()));
+        if (id == 0L) {
+            id = UrlRepository.save(new Url(url.toString()));
 
-                        if (id == 0L) {
-                            throw new InternalServerErrorResponse("Ошибка при регистрации сайта.");
-                        }
+            if (id == 0L) {
+                throw new InternalServerErrorResponse("Ошибка при регистрации сайта.");
+            }
 
-                        ctx.sessionAttribute("flash", "Страница успешно добавлена");
-                        ctx.sessionAttribute("status", Flash.SUCCESS);
-                    } else {
-                        ctx.sessionAttribute("flash", "Страница уже существует");
-                        ctx.sessionAttribute("status", Flash.FAIL);
-                    }
+            ctx.sessionAttribute("flash", "Страница успешно добавлена");
+            ctx.sessionAttribute("status", Flash.SUCCESS);
+        } else {
+            ctx.sessionAttribute("flash", "Страница уже существует");
+            ctx.sessionAttribute("status", Flash.FAIL);
+        }
 
-                    ctx.redirect(NamedRoutes.urlPath(id));
-                },
-                () -> {
-                    ctx.status(HttpStatus.UNPROCESSABLE_CONTENT);
-
-                    ctx.render(
-                            "index.jte",
-                            Map.of("input", site, "flash", new Flash("Некорректный URL", -1)));
-                });
+        ctx.redirect(NamedRoutes.urlPath(id));
     }
 
     // Обработчик запроса на добавление сайта
